@@ -157,7 +157,7 @@
         <div class="camera-frame">
             <iframe id="cameraIframe" 
                     class="camera-iframe"
-                    src="http://192.168.1.91/" 
+                    src="http://192.168.1.91/iframe" 
                     allowfullscreen>
             </iframe>
             
@@ -227,9 +227,9 @@
                 
                 document.getElementById('cameraIP').textContent = newIP;
                 
-                // Update iframe source
+                // Update iframe source to use /iframe endpoint
                 const iframe = document.getElementById('cameraIframe');
-                iframe.src = `http://${newIP}/`;
+                iframe.src = `http://${newIP}/iframe`;
                 
                 // Show loading
                 document.getElementById('loading').style.display = 'block';
@@ -252,12 +252,12 @@
         function refreshCamera() {
             const iframe = document.getElementById('cameraIframe');
             document.getElementById('loading').style.display = 'block';
-            iframe.src = iframe.src + '?t=' + new Date().getTime();
+            iframe.src = `http://${currentCameraIP}/iframe?t=` + new Date().getTime();
         }
 
         // Open fullscreen
         function openFullscreen() {
-            window.open(`http://${currentCameraIP}/`, '_blank', 'fullscreen=yes,scrollbars=no,resizable=no');
+            window.open(`http://${currentCameraIP}/iframe`, '_blank', 'fullscreen=yes,scrollbars=no,resizable=no');
         }
 
         // Update uptime
