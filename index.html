@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Debug Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .debug-container { max-width: 800px; margin: 0 auto; padding: 20px; background: white; border-radius: 10px; }
+        .debug-info { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .camera-container { text-align: center; margin: 20px 0; }
+        .camera-stream { max-width: 100%; border: 2px solid #333; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .test-section { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #debug-log { background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 200px; overflow-y: auto; border: 1px solid #dee2e6; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Camera Debug Dashboard</h1>
+        
+        <!-- E-Ra Connection Status -->
+        <div id="era-status" class="status disconnected">
+            E-Ra Status: Connecting...
+        </div>
+        
+        <!-- Camera IP Debug Info -->
+        <div class="debug-info">
+            <h3>📡 Camera IP Debug Information:</h3>
+            <p><strong>Expected IP from ESP32-CAM:</strong> <span id="expected-ip">192.168.1.91</span></p>
+            <p><strong>Received IP from E-Ra V12:</strong> <span id="received-ip">Not received yet</span></p>
+            <p><strong>Current Stream URL:</strong> <span id="current-stream-url">Not set</span></p>
+            <p><strong>Virtual Pin V12 Value:</strong> <span id="v12-value">Not received</span></p>
+        </div>
+        
+        <!-- Manual Test Section -->
+        <div class="test-section">
+            <h3>🧪 Manual Test Section:</h3>
+            <button onclick="testDirectStream()">Test Direct Stream (192.168.1.91)</button>
+            <button onclick="testCameraPage()">Test Camera Web Page</button>
+            <button onclick="forceUpdateIP()">Force Update IP from E-Ra</button>
+            <button onclick="clearLog()">Clear Debug Log</button>
+        </div>
+        
+        <!-- Camera Stream Display -->
+        <div class="camera-container">
+            <h3>📹 Camera Stream:</h3>
+            <img id="camera-stream" class="camera-stream" 
+                 src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'><rect width='640' height='480' fill='%23f0f2f5'/><text x='320' y='240' text-anchor='middle' fill='%2364748b' font-family='Arial' font-size='18'>Waiting for camera IP...</text></svg>"
+                 alt="Camera stream will appear here"
+                 onerror="handleImageError(this)">
+        </div>
+        
+        <!-- Debug Log -->
+        <div class="debug-info">
+            <h3>📝 Debug Log:</h3>
+            <div id="debug-log"></div>
+        </div>
+    </div>
+
+    <!-- E-Ra Widget Integration -->
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+    <script>
+        const eraWidget = new EraWidget();
+        
+        // Configuration variables
+        let configCamIP = null;
+        let configCamStatus = null;
+        let receivedCameraIP = "";
+        
+        function logDebug(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('debug-log');
+            logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+        
+        function updateStatus(connected) {
+            const statusElement = document.getElementById('era-status');
+            if (connected) {
+                statusElement.className = 'status connected';
+                statusElement.textContent = 'E-Ra Status: Connected ✅';
+                logDebug('✅ E-Ra connected successfully');
+            } else {
+                statusElement.className = 'status disconnected';
+                statusElement.textContent = 'E-Ra Status: Disconnected ❌';
+                logDebug('❌ E-Ra disconnected');
+            }
+        }
+        
+        function updateCameraStream(ip) {
+            if (ip && ip !== "0.0.0.0") {
+                receivedCameraIP = ip;
+                const streamUrl = `http://${ip}/stream`;
+                
+                document.getElementById('received-ip').textContent = ip;
+                document.getElementById('current-stream-url').textContent = streamUrl;
+                document.getElementById('camera-stream').src = streamUrl;
+                
+                logDebug(`📡 Camera IP received: ${ip}`);
+                logDebug(`🔗 Stream URL updated: ${streamUrl}`);
+            } else {
+                logDebug(`❌ Invalid camera IP received: ${ip}`);
+            }
+        }
+        
+        function handleImageError(img) {
+            logDebug('❌ Camera stream failed to load');
+            img.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'><rect width='640' height='480' fill='%23fee2e2'/><text x='320' y='220' text-anchor='middle' fill='%23dc2626' font-family='Arial' font-size='16'>Camera Stream Failed</text><text x='320' y='250' text-anchor='middle' fill='%23dc2626' font-family='Arial' font-size='14'>Check ESP32-CAM connection</text><text x='320' y='280' text-anchor='middle' fill='%23dc2626' font-family='Arial' font-size='12'>IP: " + receivedCameraIP + "</text></svg>";
+        }
+        
+        // Manual test functions
+        function testDirectStream() {
+            const testIP = "192.168.1.91";
+            logDebug(`🧪 Testing direct stream: http://${testIP}/stream`);
+            window.open(`http://${testIP}/stream`, '_blank');
+        }
+        
+        function testCameraPage() {
+            const testIP = "192.168.1.91";
+            logDebug(`🧪 Testing camera web page: http://${testIP}`);
+            window.open(`http://${testIP}`, '_blank');
+        }
+        
+        function forceUpdateIP() {
+            if (receivedCameraIP) {
+                logDebug(`🔄 Force updating camera stream with IP: ${receivedCameraIP}`);
+                updateCameraStream(receivedCameraIP);
+            } else {
+                logDebug('❌ No camera IP received from E-Ra yet');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+            logDebug('🧹 Debug log cleared');
+        }
+        
+        // Initialize E-Ra Widget
+        eraWidget.init({
+            onConfiguration: (configuration) => {
+                logDebug('🔧 E-Ra Configuration received');
+                logDebug(`📋 Realtime configs count: ${configuration.realtime_configs?.length || 0}`);
+                
+                // Map Camera configurations (V10-V12)
+                if (configuration.realtime_configs && configuration.realtime_configs.length > 12) {
+                    configCamStatus = configuration.realtime_configs[11];  // V11
+                    configCamIP = configuration.realtime_configs[12];      // V12
+                    
+                    logDebug('✅ Camera configurations mapped:');
+                    logDebug(`  - V_CAM_STATUS (V11): ${configCamStatus ? 'Found' : 'Not found'}`);
+                    logDebug(`  - V_CAM_IP (V12): ${configCamIP ? 'Found' : 'Not found'}`);
+                } else {
+                    logDebug('❌ Insufficient realtime configs for camera');
+                }
+            },
+            
+            onValues: (values) => {
+                // Handle Camera IP (V12)
+                if (configCamIP && values[configCamIP.id]) {
+                    const cameraIP = values[configCamIP.id].value;
+                    document.getElementById('v12-value').textContent = cameraIP || 'Empty';
+                    
+                    if (cameraIP && cameraIP !== receivedCameraIP) {
+                        logDebug(`📡 New camera IP received from V12: ${cameraIP}`);
+                        updateCameraStream(cameraIP);
+                    }
+                }
+                
+                // Handle Camera Status (V11)
+                if (configCamStatus && values[configCamStatus.id]) {
+                    const cameraStatus = values[configCamStatus.id].value;
+                    logDebug(`📊 Camera status: ${cameraStatus}`);
+                }
+                
+                // Log all received values for debugging
+                Object.keys(values).forEach(key => {
+                    const value = values[key];
+                    if (value && value.value !== undefined) {
+                        console.log(`[E-Ra] Pin ${key}: ${value.value}`);
+                    }
+                });
+            },
+            
+            onConnect: () => {
+                updateStatus(true);
+            },
+            
+            onDisconnect: () => {
+                updateStatus(false);
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            logDebug('🚀 Camera Debug Dashboard initialized');
+            logDebug('⏳ Waiting for E-Ra connection and camera IP...');
+        });
+    </script>
+</body>
+</html>
