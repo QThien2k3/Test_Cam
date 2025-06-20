@@ -409,7 +409,8 @@
             console.log('Starting stream with URL:', streamURL);
             
             if (!streamURL) {
-                alert('Chưa có địa chỉ stream. Vui lòng chờ tự động phát hiện hoặc nhấn "Tự động tìm IP"');
+                console.log('No stream URL, trying auto detection...');
+                autoDetectIP();
                 return;
             }
             
@@ -422,14 +423,33 @@
             streamImg.style.display = 'none';
             noSignal.style.display = 'none';
             
-            streamImg.onload = function() {
+            // Create a new image element to test the stream
+            const testImg = new Image();
+            testImg.crossOrigin = 'anonymous';
+            
+            testImg.onload = function() {
+                console.log('Stream test successful, starting actual stream');
                 loadingSpinner.style.display = 'none';
                 streamImg.style.display = 'block';
-                console.log('Stream loaded successfully');
+                
+                // Add cache buster and start the actual stream
+                const cacheBuster = new Date().getTime();
+                streamImg.src = streamURL + '?t=' + cacheBuster;
+                
+                // Set up the actual stream image handlers
+                streamImg.onload = function() {
+                    console.log('Stream started successfully');
+                };
+                
+                streamImg.onerror = function() {
+                    console.error('Stream failed after successful test');
+                    showNoSignal();
+                    setTimeout(startStream, 5000); // Retry after 5 seconds
+                };
             };
             
-            streamImg.onerror = function() {
-                console.error('Failed to load stream');
+            testImg.onerror = function() {
+                console.error('Stream test failed');
                 showNoSignal();
                 
                 // Try mDNS fallback
@@ -438,9 +458,8 @@
                 }, 2000);
             };
             
-            // Add cache buster to prevent caching issues
-            const cacheBuster = new Date().getTime();
-            streamImg.src = streamURL + '?t=' + cacheBuster;
+            // Test the stream URL first
+            testImg.src = streamURL + '/test?' + new Date().getTime();
         }
 
         // Show no signal message
