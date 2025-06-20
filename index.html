@@ -3,40 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32-CAM Live Stream</title>
+    <title>ESP32-CAM Simple Stream</title>
     <style>
         body {
             margin: 0;
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 2.5em;
+            font-size: 1.8em;
             font-weight: 300;
-            background: linear-gradient(45deg, #fff, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .status-bar {
@@ -44,84 +41,46 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
-            padding: 15px 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
         }
 
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ff4757;
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator.online {
-            background: #2ed573;
-        }
-
-        .camera-container {
-            position: relative;
+        .camera-frame {
+            flex: 1;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 20px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
         }
 
-        .camera-stream {
+        .camera-iframe {
             width: 100%;
-            height: auto;
-            max-height: 600px;
-            object-fit: contain;
-            display: none;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .no-signal {
-            text-align: center;
-            padding: 50px;
-            opacity: 0.7;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
         }
 
         .controls {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-radius: 20px;
+            background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
             font-weight: 600;
             cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
@@ -129,48 +88,30 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn.success {
-            background: linear-gradient(45deg, #2ed573, #1e90ff);
+        .btn.danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
         }
 
         .btn.info {
-            background: linear-gradient(45deg, #3742fa, #2f3542);
+            background: linear-gradient(45deg, #17a2b8, #138496);
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
         }
 
-        .info-card {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 4px solid #ffd700;
-        }
-
-        .info-card h3 {
-            margin: 0 0 10px 0;
-            color: #ffd700;
-        }
-
-        .info-value {
-            font-family: 'Courier New', monospace;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 12px;
-            border-radius: 8px;
-            word-break: break-all;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
         }
 
         @keyframes spin {
@@ -180,17 +121,23 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 20px;
-                margin: 10px;
+                padding: 10px;
+                height: calc(100vh - 20px);
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 1.4em;
             }
             
             .status-bar {
                 flex-direction: column;
+                gap: 5px;
                 text-align: center;
+            }
+            
+            .btn {
+                font-size: 0.8em;
+                padding: 6px 12px;
             }
         }
     </style>
@@ -198,73 +145,42 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>ESP32-CAM Live Stream</h1>
+            <h1>📹 ESP32-CAM Live Stream</h1>
         </div>
 
         <div class="status-bar">
-            <div class="status-item">
-                <div class="status-indicator" id="cameraStatus"></div>
-                <span id="statusText">Đang kết nối...</span>
-            </div>
-            <div class="status-item">
-                <span>IP: </span>
-                <span id="cameraIP">Đang tìm kiếm...</span>
-            </div>
-            <div class="status-item">
-                <span>Uptime: </span>
-                <span id="uptime">00:00:00</span>
-            </div>
+            <div>🟢 <span id="statusText">Camera Online</span></div>
+            <div>📡 IP: <span id="cameraIP">192.168.1.91</span></div>
+            <div>⏱️ <span id="uptime">00:00:00</span></div>
         </div>
 
-        <div class="camera-container">
-            <img id="cameraStream" class="camera-stream" alt="Camera Stream">
-            <div id="loadingSpinner" class="loading-spinner"></div>
-            <div id="noSignal" class="no-signal" style="display: none;">
-                <h3>📷 Không có tín hiệu</h3>
-                <p>Đang chờ kết nối camera...</p>
+        <div class="camera-frame">
+            <iframe id="cameraIframe" 
+                    class="camera-iframe"
+                    src="http://192.168.1.91/" 
+                    allowfullscreen>
+            </iframe>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <div>Đang tải camera...</div>
             </div>
         </div>
 
         <div class="controls">
-            <button class="btn success" onclick="startStream()">🎥 Bắt đầu Stream</button>
-            <button class="btn info" onclick="refreshConnection()">🔄 Làm mới</button>
-            <button class="btn" onclick="capturePhoto()">📸 Chụp ảnh</button>
-            <button class="btn info" onclick="autoDetectIP()">🔍 Tự động tìm IP</button>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>📡 Địa chỉ IP</h3>
-                <div class="info-value" id="displayIP">Chưa xác định</div>
-            </div>
-            <div class="info-card">
-                <h3>🔗 Stream URL</h3>
-                <div class="info-value" id="displayStreamURL">Chưa có</div>
-            </div>
-            <div class="info-card">
-                <h3>🌐 mDNS</h3>
-                <div class="info-value" id="displayMDNS">esp32cam.local</div>
-            </div>
-            <div class="info-card">
-                <h3>ℹ️ Trạng thái</h3>
-                <div class="info-value" id="displayStatus">Đang khởi tạo</div>
-            </div>
+            <button class="btn" onclick="refreshCamera()">🔄 Làm mới</button>
+            <a class="btn info" href="http://192.168.1.91/stream" target="_blank">📺 Direct Stream</a>
+            <a class="btn danger" href="http://192.168.1.91/capture" target="_blank">📸 Capture</a>
+            <button class="btn info" onclick="openFullscreen()">🖥️ Toàn màn hình</button>
         </div>
     </div>
 
     <!-- E-Ra Widget Integration -->
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        // Global variables
         let eraWidget = null;
-        let currentCameraIP = null;
-        let streamURL = null;
-        let cameraStatus = false;
+        let currentCameraIP = "192.168.1.91"; // Default IP
         let startTime = Date.now();
-        let configCameraIP = null;
-        let configCameraStatus = null;
-        let configStreamURL = null;
-        let configCameraInfo = null;
 
         // Initialize E-Ra Widget
         function initializeEraWidget() {
@@ -274,484 +190,77 @@
                 eraWidget.init({
                     onConfiguration: (configuration) => {
                         console.log('E-Ra Configuration received:', configuration);
-                        
-                        // Map configurations theo Virtual Pin
-                        if (configuration.realtime_configs) {
-                            configCameraIP = configuration.realtime_configs.find(c => c.pin === 'V0');
-                            configCameraStatus = configuration.realtime_configs.find(c => c.pin === 'V1');
-                            configStreamURL = configuration.realtime_configs.find(c => c.pin === 'V2');
-                            configCameraInfo = configuration.realtime_configs.find(c => c.pin === 'V3');
-                        }
-                        
-                        console.log('Configurations mapped successfully');
                     },
 
                     onValues: (values) => {
                         console.log('E-Ra Values received:', values);
                         
-                        try {
-                            // Cập nhật IP camera từ V0
-                            if (configCameraIP && values[configCameraIP.id]) {
-                                const newIP = values[configCameraIP.id].value;
-                                if (newIP && newIP !== currentCameraIP) {
-                                    currentCameraIP = newIP;
-                                    updateCameraIP(newIP);
-                                }
+                        // Find Virtual Pin values
+                        Object.keys(values).forEach(key => {
+                            const value = values[key].value;
+                            
+                            // Check if this looks like an IP address
+                            if (typeof value === 'string' && value.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+                                updateCameraIP(value);
                             }
                             
-                            // Cập nhật trạng thái camera từ V1
-                            if (configCameraStatus && values[configCameraStatus.id]) {
-                                const status = values[configCameraStatus.id].value;
-                                updateCameraStatus(status === 1);
+                            // Check if this looks like a stream URL
+                            if (typeof value === 'string' && value.includes('http://') && value.includes('/stream')) {
+                                const ip = value.match(/http:\/\/([^\/]+)/)[1];
+                                updateCameraIP(ip);
                             }
-                            
-                            // Cập nhật Stream URL từ V2
-                            if (configStreamURL && values[configStreamURL.id]) {
-                                const newStreamURL = values[configStreamURL.id].value;
-                                if (newStreamURL && newStreamURL !== streamURL) {
-                                    streamURL = newStreamURL;
-                                    updateStreamURL(newStreamURL);
-                                }
-                            }
-                            
-                            // Cập nhật thông tin camera từ V3
-                            if (configCameraInfo && values[configCameraInfo.id]) {
-                                const cameraInfo = values[configCameraInfo.id].value;
-                                if (cameraInfo) {
-                                    try {
-                                        const info = JSON.parse(cameraInfo);
-                                        updateCameraInfo(info);
-                                    } catch (e) {
-                                        console.log('Camera info is not JSON:', cameraInfo);
-                                    }
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Error processing E-Ra values:', error);
-                        }
+                        });
                     }
                 });
                 
                 console.log('E-Ra Widget initialized successfully');
             } catch (error) {
                 console.error('Failed to initialize E-Ra Widget:', error);
-                // Fallback to manual IP detection
-                setTimeout(autoDetectIP, 2000);
             }
         }
 
-        // Update camera IP
-        function updateCameraIP(ip) {
-            console.log('Updating camera IP:', ip);
-            document.getElementById('cameraIP').textContent = ip;
-            document.getElementById('displayIP').textContent = ip;
-            
-            // Update stream URL
-            streamURL = `http://${ip}/stream`;
-            updateStreamURL(streamURL);
-        }
-
-        // Update stream URL
-        function updateStreamURL(url) {
-            console.log('Updating stream URL:', url);
-            streamURL = url;
-            document.getElementById('displayStreamURL').textContent = url;
-            
-            // Auto start stream if camera is online
-            if (cameraStatus && url) {
-                setTimeout(startStream, 1000);
-            }
-        }
-
-        // Update camera status
-        function updateCameraStatus(isOnline) {
-            console.log('Updating camera status:', isOnline);
-            cameraStatus = isOnline;
-            
-            const statusIndicator = document.getElementById('cameraStatus');
-            const statusText = document.getElementById('statusText');
-            const displayStatus = document.getElementById('displayStatus');
-            
-            if (isOnline) {
-                statusIndicator.classList.add('online');
-                statusText.textContent = 'Camera Online';
-                displayStatus.textContent = 'Trực tuyến';
+        // Update camera IP and reload iframe
+        function updateCameraIP(newIP) {
+            if (newIP && newIP !== currentCameraIP) {
+                console.log('Updating camera IP from', currentCameraIP, 'to', newIP);
+                currentCameraIP = newIP;
                 
-                // Auto start stream
-                if (streamURL) {
-                    setTimeout(startStream, 500);
-                }
-            } else {
-                statusIndicator.classList.remove('online');
-                statusText.textContent = 'Camera Offline';
-                displayStatus.textContent = 'Ngoại tuyến';
+                document.getElementById('cameraIP').textContent = newIP;
                 
-                showNoSignal();
-            }
-        }
-
-        // Update camera info
-        function updateCameraInfo(info) {
-            console.log('Updating camera info:', info);
-            
-            if (info.ip) updateCameraIP(info.ip);
-            if (info.stream_url) updateStreamURL(info.stream_url);
-            if (info.mdns) {
-                document.getElementById('displayMDNS').textContent = info.mdns;
-            }
-            if (info.status) {
-                updateCameraStatus(info.status === 'online');
-            }
-        }
-
-        // Start video stream với CORS và Mixed Content handling
-        function startStream() {
-            console.log('Starting stream with URL:', streamURL);
-            
-            if (!streamURL) {
-                console.log('No stream URL, trying auto detection...');
-                autoDetectIP();
-                return;
-            }
-            
-            const streamImg = document.getElementById('cameraStream');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const noSignal = document.getElementById('noSignal');
-            
-            // Show loading
-            loadingSpinner.style.display = 'block';
-            streamImg.style.display = 'none';
-            noSignal.style.display = 'none';
-            
-            // Try different approaches for iframe compatibility
-            tryStreamMethods();
-        }
-        
-        // Try multiple methods to display stream
-        function tryStreamMethods() {
-            const methods = [
-                () => tryDirectImage(),
-                () => tryIframeEmbed(),
-                () => tryProxyMethod(),
-                () => tryBase64Method()
-            ];
-            
-            let currentMethod = 0;
-            
-            function tryNextMethod() {
-                if (currentMethod < methods.length) {
-                    console.log(`Trying stream method ${currentMethod + 1}/${methods.length}`);
-                    methods[currentMethod]();
-                    currentMethod++;
-                } else {
-                    console.log('All stream methods failed');
-                    showNoSignal();
-                }
-            }
-            
-            // Start with first method
-            tryNextMethod();
-            
-            // Auto retry next method if current fails
-            window.streamRetryMethod = tryNextMethod;
-        }
-        
-        // Method 1: Direct image (most common issue with CORS)
-        function tryDirectImage() {
-            console.log('Method 1: Direct image');
-            const streamImg = document.getElementById('cameraStream');
-            
-            streamImg.onload = function() {
-                console.log('Direct image method successful');
-                document.getElementById('loadingSpinner').style.display = 'none';
-                streamImg.style.display = 'block';
-            };
-            
-            streamImg.onerror = function() {
-                console.log('Direct image method failed');
-                setTimeout(window.streamRetryMethod, 2000);
-            };
-            
-            // Remove crossorigin attribute that might cause CORS issues
-            streamImg.removeAttribute('crossorigin');
-            streamImg.src = streamURL + '?t=' + new Date().getTime();
-        }
-        
-        // Method 2: Iframe embed (bypass CORS completely)
-        function tryIframeEmbed() {
-            console.log('Method 2: Iframe embed');
-            const cameraContainer = document.querySelector('.camera-container');
-            
-            // Remove existing content
-            cameraContainer.innerHTML = '';
-            
-            // Create iframe
-            const iframe = document.createElement('iframe');
-            iframe.src = streamURL.replace('/stream', '/');  // Use main page instead of direct stream
-            iframe.style.width = '100%';
-            iframe.style.height = '500px';
-            iframe.style.border = 'none';
-            iframe.style.borderRadius = '15px';
-            iframe.frameBorder = '0';
-            iframe.allowFullscreen = true;
-            
-            iframe.onload = function() {
-                console.log('Iframe embed method successful');
-                document.getElementById('loadingSpinner').style.display = 'none';
-            };
-            
-            iframe.onerror = function() {
-                console.log('Iframe embed method failed');
-                setTimeout(window.streamRetryMethod, 2000);
-            };
-            
-            cameraContainer.appendChild(iframe);
-        }
-        
-        // Method 3: Proxy method using data URLs
-        function tryProxyMethod() {
-            console.log('Method 3: Proxy method');
-            
-            // Create a simple proxy using fetch API
-            async function fetchStream() {
-                try {
-                    const response = await fetch(streamURL.replace('/stream', '/capture'), {
-                        mode: 'no-cors',
-                        cache: 'no-cache'
-                    });
-                    
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const objectURL = URL.createObjectURL(blob);
-                        
-                        const streamImg = document.getElementById('cameraStream');
-                        streamImg.src = objectURL;
-                        streamImg.onload = function() {
-                            console.log('Proxy method successful');
-                            document.getElementById('loadingSpinner').style.display = 'none';
-                            streamImg.style.display = 'block';
-                            
-                            // Refresh image every 2 seconds for pseudo-stream
-                            setTimeout(fetchStream, 2000);
-                        };
-                    } else {
-                        throw new Error('Fetch failed');
-                    }
-                } catch (error) {
-                    console.log('Proxy method failed:', error);
-                    setTimeout(window.streamRetryMethod, 2000);
-                }
-            }
-            
-            fetchStream();
-        }
-        
-        // Method 4: Base64 encoded approach
-        function tryBase64Method() {
-            console.log('Method 4: Fallback message');
-            
-            const cameraContainer = document.querySelector('.camera-container');
-            cameraContainer.innerHTML = `
-                <div style="padding: 40px; text-align: center; background: rgba(255,255,255,0.1); border-radius: 15px;">
-                    <h3>📹 Camera Stream Available</h3>
-                    <p>Camera is online at: <strong>${currentCameraIP}</strong></p>
-                    <p>Click button below to open stream in new window:</p>
-                    <button onclick="window.open('${streamURL.replace('/stream', '/')}', '_blank')" 
-                            style="padding: 15px 30px; background: #28a745; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin: 10px;">
-                        🚀 Open Camera Stream
-                    </button>
-                    <br>
-                    <button onclick="window.open('${streamURL}', '_blank')" 
-                            style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin: 10px;">
-                        📺 Direct Stream
-                    </button>
-                    <br>
-                    <small style="opacity: 0.8;">
-                        Due to browser security policies, the stream may not display directly in iframe.<br>
-                        Use the buttons above to access the camera stream.
-                    </small>
-                </div>
-            `;
-            
-            document.getElementById('loadingSpinner').style.display = 'none';
-        }
-
-        // Show no signal message
-        function showNoSignal() {
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('cameraStream').style.display = 'none';
-            document.getElementById('noSignal').style.display = 'block';
-        }
-
-        // Try mDNS connection as fallback
-        function tryMDNSConnection() {
-            console.log('Trying mDNS connection...');
-            const mdnsURL = 'http://esp32cam.local/stream';
-            
-            const testImg = new Image();
-            testImg.onload = function() {
-                console.log('mDNS connection successful');
-                streamURL = mdnsURL;
-                updateStreamURL(mdnsURL);
-                startStream();
-            };
-            testImg.onerror = function() {
-                console.log('mDNS connection failed');
-            };
-            testImg.src = mdnsURL + '?test=' + new Date().getTime();
-        }
-
-        // Auto detect IP by scanning common ranges
-        function autoDetectIP() {
-            console.log('Auto detecting camera IP...');
-            document.getElementById('statusText').textContent = 'Đang quét mạng...';
-            
-            // Get current network info
-            const currentIP = getCurrentNetworkIP();
-            if (currentIP) {
-                scanIPRange(currentIP);
-            } else {
-                // Fallback to common ranges
-                scanCommonRanges();
-            }
-        }
-
-        // Get current network IP (approximation)
-        function getCurrentNetworkIP() {
-            // This is a simplified approach
-            // In real scenario, we might need WebRTC or other methods
-            return null; // Will use common ranges
-        }
-
-        // Scan common IP ranges
-        function scanCommonRanges() {
-            const commonRanges = [
-                '192.168.1.',
-                '192.168.0.',
-                '192.168.4.',
-                '10.0.0.',
-                '172.16.0.'
-            ];
-            
-            let scanCount = 0;
-            const totalScans = commonRanges.length * 254;
-            
-            commonRanges.forEach(range => {
-                for (let i = 1; i <= 254; i++) {
-                    const testIP = range + i;
-                    testCameraIP(testIP, () => {
-                        scanCount++;
-                        if (scanCount >= totalScans) {
-                            document.getElementById('statusText').textContent = 'Quét hoàn tất';
-                        }
-                    });
-                }
-            });
-        }
-
-        // Scan specific IP range
-        function scanIPRange(baseIP) {
-            const parts = baseIP.split('.');
-            const subnet = parts.slice(0, 3).join('.') + '.';
-            
-            for (let i = 1; i <= 254; i++) {
-                const testIP = subnet + i;
-                testCameraIP(testIP);
-            }
-        }
-
-        // Test if IP has camera
-        function testCameraIP(ip, callback) {
-            const testURL = `http://${ip}/stream`;
-            const timeout = 2000; // 2 seconds timeout
-            
-            const img = new Image();
-            const timer = setTimeout(() => {
-                img.onload = img.onerror = null;
-                if (callback) callback();
-            }, timeout);
-            
-            img.onload = function() {
-                clearTimeout(timer);
-                console.log('Found camera at:', ip);
+                // Update iframe source
+                const iframe = document.getElementById('cameraIframe');
+                iframe.src = `http://${newIP}/`;
                 
-                // Update IP and stream
-                currentCameraIP = ip;
-                updateCameraIP(ip);
-                updateCameraStatus(true);
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
                 
-                // Notify E-Ra if available
-                if (eraWidget && configCameraIP) {
-                    try {
-                        // Send discovered IP back to E-Ra
-                        eraWidget.triggerAction({
-                            pin: 'V0',
-                            value: ip
-                        }, null);
-                    } catch (e) {
-                        console.log('Could not send IP to E-Ra:', e);
-                    }
-                }
-                
-                if (callback) callback();
-            };
-            
-            img.onerror = function() {
-                clearTimeout(timer);
-                if (callback) callback();
-            };
-            
-            img.src = testURL + '?test=' + new Date().getTime();
-        }
-
-        // Refresh connection
-        function refreshConnection() {
-            console.log('Refreshing connection...');
-            
-            // Reset status
-            updateCameraStatus(false);
-            
-            // Request fresh data from E-Ra
-            if (eraWidget && configCameraIP) {
-                try {
-                    eraWidget.triggerAction({
-                        pin: 'V0',
-                        value: 'get_ip'
-                    }, null);
-                } catch (e) {
-                    console.log('Could not request IP from E-Ra:', e);
-                }
-            }
-            
-            // Fallback to auto detection
-            setTimeout(autoDetectIP, 1000);
-        }
-
-        // Capture photo
-        function capturePhoto() {
-            if (!currentCameraIP) {
-                alert('Chưa có kết nối camera');
-                return;
-            }
-            
-            const captureURL = `http://${currentCameraIP}/capture`;
-            
-            // Open in new window
-            const newWindow = window.open(captureURL, '_blank', 'width=800,height=600');
-            
-            if (!newWindow) {
-                // Fallback - create download link
-                const link = document.createElement('a');
-                link.href = captureURL;
-                link.download = 'camera_capture_' + new Date().getTime() + '.jpg';
-                link.target = '_blank';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // Update control buttons
+                updateControlButtons(newIP);
             }
         }
 
-        // Update uptime display
+        // Update control button URLs
+        function updateControlButtons(ip) {
+            const streamBtn = document.querySelector('a[href*="/stream"]');
+            const captureBtn = document.querySelector('a[href*="/capture"]');
+            
+            if (streamBtn) streamBtn.href = `http://${ip}/stream`;
+            if (captureBtn) captureBtn.href = `http://${ip}/capture`;
+        }
+
+        // Refresh camera
+        function refreshCamera() {
+            const iframe = document.getElementById('cameraIframe');
+            document.getElementById('loading').style.display = 'block';
+            iframe.src = iframe.src + '?t=' + new Date().getTime();
+        }
+
+        // Open fullscreen
+        function openFullscreen() {
+            window.open(`http://${currentCameraIP}/`, '_blank', 'fullscreen=yes,scrollbars=no,resizable=no');
+        }
+
+        // Update uptime
         function updateUptime() {
             const elapsed = Date.now() - startTime;
             const hours = Math.floor(elapsed / 3600000);
@@ -766,40 +275,16 @@
             document.getElementById('uptime').textContent = uptimeString;
         }
 
-        // Network change detection
-        function detectNetworkChange() {
-            let wasOnline = navigator.onLine;
-            
-            setInterval(() => {
-                const isOnline = navigator.onLine;
-                if (isOnline !== wasOnline) {
-                    wasOnline = isOnline;
-                    if (isOnline) {
-                        console.log('Network reconnected, refreshing...');
-                        setTimeout(refreshConnection, 2000);
-                    } else {
-                        console.log('Network disconnected');
-                        updateCameraStatus(false);
-                    }
-                }
+        // Hide loading when iframe loads
+        document.getElementById('cameraIframe').onload = function() {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
             }, 1000);
-        }
+        };
 
-        // Periodic health check
-        function startHealthCheck() {
-            setInterval(() => {
-                if (currentCameraIP && cameraStatus) {
-                    // Test if camera is still accessible
-                    testCameraIP(currentCameraIP, () => {
-                        // Health check completed
-                    });
-                }
-            }, 30000); // Check every 30 seconds
-        }
-
-        // Initialize everything when page loads
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, initializing...');
+            console.log('Initializing ESP32-CAM Simple iFrame...');
             
             // Start uptime counter
             setInterval(updateUptime, 1000);
@@ -807,62 +292,19 @@
             // Initialize E-Ra Widget
             initializeEraWidget();
             
-            // Start network change detection
-            detectNetworkChange();
-            
-            // Start health check
-            startHealthCheck();
-            
-            // Initial auto detection after a short delay
+            // Hide loading after initial load
             setTimeout(() => {
-                if (!currentCameraIP) {
-                    autoDetectIP();
-                }
+                document.getElementById('loading').style.display = 'none';
             }, 3000);
             
             console.log('Initialization completed');
         });
 
-        // Handle page visibility change
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                console.log('Page became visible, refreshing stream...');
-                if (streamURL && cameraStatus) {
-                    setTimeout(startStream, 500);
-                }
-            }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'r':
-                        e.preventDefault();
-                        refreshConnection();
-                        break;
-                    case 's':
-                        e.preventDefault();
-                        startStream();
-                        break;
-                    case 'p':
-                        e.preventDefault();
-                        capturePhoto();
-                        break;
-                }
-            }
-        });
-
-        // Add error handling for global errors
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-        });
-
-        // Add unhandled promise rejection handling
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled promise rejection:', e.reason);
-        });
-
+        // Auto-refresh iframe every 5 minutes to prevent timeout
+        setInterval(() => {
+            console.log('Auto-refreshing iframe...');
+            refreshCamera();
+        }, 300000); // 5 minutes
     </script>
 </body>
 </html>
