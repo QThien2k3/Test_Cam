@@ -404,7 +404,7 @@
             }
         }
 
-        // Start video stream
+        // Start video stream với CORS và Mixed Content handling
         function startStream() {
             console.log('Starting stream with URL:', streamURL);
             
@@ -423,43 +423,157 @@
             streamImg.style.display = 'none';
             noSignal.style.display = 'none';
             
-            // Create a new image element to test the stream
-            const testImg = new Image();
-            testImg.crossOrigin = 'anonymous';
+            // Try different approaches for iframe compatibility
+            tryStreamMethods();
+        }
+        
+        // Try multiple methods to display stream
+        function tryStreamMethods() {
+            const methods = [
+                () => tryDirectImage(),
+                () => tryIframeEmbed(),
+                () => tryProxyMethod(),
+                () => tryBase64Method()
+            ];
             
-            testImg.onload = function() {
-                console.log('Stream test successful, starting actual stream');
-                loadingSpinner.style.display = 'none';
-                streamImg.style.display = 'block';
-                
-                // Add cache buster and start the actual stream
-                const cacheBuster = new Date().getTime();
-                streamImg.src = streamURL + '?t=' + cacheBuster;
-                
-                // Set up the actual stream image handlers
-                streamImg.onload = function() {
-                    console.log('Stream started successfully');
-                };
-                
-                streamImg.onerror = function() {
-                    console.error('Stream failed after successful test');
+            let currentMethod = 0;
+            
+            function tryNextMethod() {
+                if (currentMethod < methods.length) {
+                    console.log(`Trying stream method ${currentMethod + 1}/${methods.length}`);
+                    methods[currentMethod]();
+                    currentMethod++;
+                } else {
+                    console.log('All stream methods failed');
                     showNoSignal();
-                    setTimeout(startStream, 5000); // Retry after 5 seconds
-                };
+                }
+            }
+            
+            // Start with first method
+            tryNextMethod();
+            
+            // Auto retry next method if current fails
+            window.streamRetryMethod = tryNextMethod;
+        }
+        
+        // Method 1: Direct image (most common issue with CORS)
+        function tryDirectImage() {
+            console.log('Method 1: Direct image');
+            const streamImg = document.getElementById('cameraStream');
+            
+            streamImg.onload = function() {
+                console.log('Direct image method successful');
+                document.getElementById('loadingSpinner').style.display = 'none';
+                streamImg.style.display = 'block';
             };
             
-            testImg.onerror = function() {
-                console.error('Stream test failed');
-                showNoSignal();
-                
-                // Try mDNS fallback
-                setTimeout(() => {
-                    tryMDNSConnection();
-                }, 2000);
+            streamImg.onerror = function() {
+                console.log('Direct image method failed');
+                setTimeout(window.streamRetryMethod, 2000);
             };
             
-            // Test the stream URL first
-            testImg.src = streamURL + '/test?' + new Date().getTime();
+            // Remove crossorigin attribute that might cause CORS issues
+            streamImg.removeAttribute('crossorigin');
+            streamImg.src = streamURL + '?t=' + new Date().getTime();
+        }
+        
+        // Method 2: Iframe embed (bypass CORS completely)
+        function tryIframeEmbed() {
+            console.log('Method 2: Iframe embed');
+            const cameraContainer = document.querySelector('.camera-container');
+            
+            // Remove existing content
+            cameraContainer.innerHTML = '';
+            
+            // Create iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = streamURL.replace('/stream', '/');  // Use main page instead of direct stream
+            iframe.style.width = '100%';
+            iframe.style.height = '500px';
+            iframe.style.border = 'none';
+            iframe.style.borderRadius = '15px';
+            iframe.frameBorder = '0';
+            iframe.allowFullscreen = true;
+            
+            iframe.onload = function() {
+                console.log('Iframe embed method successful');
+                document.getElementById('loadingSpinner').style.display = 'none';
+            };
+            
+            iframe.onerror = function() {
+                console.log('Iframe embed method failed');
+                setTimeout(window.streamRetryMethod, 2000);
+            };
+            
+            cameraContainer.appendChild(iframe);
+        }
+        
+        // Method 3: Proxy method using data URLs
+        function tryProxyMethod() {
+            console.log('Method 3: Proxy method');
+            
+            // Create a simple proxy using fetch API
+            async function fetchStream() {
+                try {
+                    const response = await fetch(streamURL.replace('/stream', '/capture'), {
+                        mode: 'no-cors',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const objectURL = URL.createObjectURL(blob);
+                        
+                        const streamImg = document.getElementById('cameraStream');
+                        streamImg.src = objectURL;
+                        streamImg.onload = function() {
+                            console.log('Proxy method successful');
+                            document.getElementById('loadingSpinner').style.display = 'none';
+                            streamImg.style.display = 'block';
+                            
+                            // Refresh image every 2 seconds for pseudo-stream
+                            setTimeout(fetchStream, 2000);
+                        };
+                    } else {
+                        throw new Error('Fetch failed');
+                    }
+                } catch (error) {
+                    console.log('Proxy method failed:', error);
+                    setTimeout(window.streamRetryMethod, 2000);
+                }
+            }
+            
+            fetchStream();
+        }
+        
+        // Method 4: Base64 encoded approach
+        function tryBase64Method() {
+            console.log('Method 4: Fallback message');
+            
+            const cameraContainer = document.querySelector('.camera-container');
+            cameraContainer.innerHTML = `
+                <div style="padding: 40px; text-align: center; background: rgba(255,255,255,0.1); border-radius: 15px;">
+                    <h3>📹 Camera Stream Available</h3>
+                    <p>Camera is online at: <strong>${currentCameraIP}</strong></p>
+                    <p>Click button below to open stream in new window:</p>
+                    <button onclick="window.open('${streamURL.replace('/stream', '/')}', '_blank')" 
+                            style="padding: 15px 30px; background: #28a745; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin: 10px;">
+                        🚀 Open Camera Stream
+                    </button>
+                    <br>
+                    <button onclick="window.open('${streamURL}', '_blank')" 
+                            style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin: 10px;">
+                        📺 Direct Stream
+                    </button>
+                    <br>
+                    <small style="opacity: 0.8;">
+                        Due to browser security policies, the stream may not display directly in iframe.<br>
+                        Use the buttons above to access the camera stream.
+                    </small>
+                </div>
+            `;
+            
+            document.getElementById('loadingSpinner').style.display = 'none';
         }
 
         // Show no signal message
