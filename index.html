@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32-CAM Simple Stream</title>
+    <title>ESP32-CAM HTTPS Compatible</title>
+    <!-- Remove upgrade-insecure-requests for GitHub Pages -->
     <style>
         body {
             margin: 0;
@@ -11,8 +12,7 @@
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         .container {
@@ -20,19 +20,18 @@
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
-            height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 1.8em;
+            font-size: 2em;
             font-weight: 300;
         }
 
@@ -41,45 +40,63 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
-            padding: 10px 20px;
+            padding: 15px 20px;
             border-radius: 10px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .camera-frame {
-            flex: 1;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             overflow: hidden;
             position: relative;
-        }
-
-        .camera-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 10px;
-        }
-
-        .controls {
+            min-height: 400px;
             display: flex;
-            gap: 10px;
+            align-items: center;
             justify-content: center;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        }
+
+        .mixed-content-warning {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .mixed-content-warning h3 {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+
+        .solution-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .solution-box h4 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
         }
 
         .btn {
-            padding: 8px 16px;
+            display: inline-block;
+            padding: 12px 24px;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            font-size: 0.9em;
+            font-size: 16px;
+            margin: 10px 5px;
             transition: all 0.3s ease;
         }
 
@@ -88,56 +105,72 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
+        .btn.primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+
         .btn.danger {
             background: linear-gradient(45deg, #dc3545, #c82333);
         }
 
-        .btn.info {
-            background: linear-gradient(45deg, #17a2b8, #138496);
+        .ip-input {
+            padding: 10px 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            font-size: 16px;
+            width: 200px;
+            margin: 10px;
         }
 
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+        .ip-input::placeholder {
+            color: rgba(255,255,255,0.7);
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .camera-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
-                height: calc(100vh - 20px);
-            }
-            
-            .header h1 {
-                font-size: 1.4em;
+                padding: 15px;
+                margin: 5px;
             }
             
             .status-bar {
                 flex-direction: column;
-                gap: 5px;
                 text-align: center;
             }
             
-            .btn {
-                font-size: 0.8em;
-                padding: 6px 12px;
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .ip-input {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
@@ -145,166 +178,150 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📹 ESP32-CAM Live Stream</h1>
+            <h1>📹 ESP32-CAM HTTPS Compatible</h1>
         </div>
 
         <div class="status-bar">
-            <div>🟢 <span id="statusText">Camera Online</span></div>
-            <div>📡 IP: <span id="cameraIP">192.168.1.91</span></div>
-            <div>⏱️ <span id="uptime">00:00:00</span></div>
+            <div>🌐 Protocol: <span id="protocol">HTTPS (GitHub Pages)</span></div>
+            <div>📡 Camera IP: <span id="cameraIP">Not set</span></div>
+            <div>⚠️ Status: <span id="status">Mixed Content Issue</span></div>
         </div>
 
-        <div class="camera-frame">
-            <iframe id="cameraIframe" 
-                    class="camera-iframe"
-                    src="http://192.168.1.91/iframe" 
-                    allowfullscreen>
-            </iframe>
-            
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <div>Đang tải camera...</div>
+        <div class="camera-frame" id="mainFrame">
+            <div class="mixed-content-warning">
+                <h3>⚠️ Mixed Content Security Issue</h3>
+                <p><strong>Problem:</strong> HTTPS sites (GitHub Pages) cannot load HTTP content (ESP32-CAM) due to browser security policies.</p>
+                
+                <div class="solution-box">
+                    <h4>🛠️ Solution 1: Allow Insecure Content</h4>
+                    <p><strong>Chrome/Edge:</strong> Click 🛡️ icon in address bar → Site settings → Insecure content → Allow</p>
+                    <p><strong>Firefox:</strong> Click 🛡️ icon → Disable protection for this page</p>
+                    <p><strong>Safari:</strong> Develop menu → Disable Cross-Origin Restrictions</p>
+                </div>
+                
+                <div class="solution-box">
+                    <h4>🔗 Solution 2: Direct Access</h4>
+                    <p>Access camera directly via HTTP (will work immediately)</p>
+                </div>
+                
+                <div class="solution-box">
+                    <h4>📱 Solution 3: Use HTTP Version</h4>
+                    <p>Deploy your site to HTTP hosting or use local development server</p>
+                </div>
             </div>
         </div>
 
+        <div class="iframe-container" id="iframeContainer">
+            <iframe id="cameraIframe" class="camera-iframe"></iframe>
+        </div>
+
         <div class="controls">
-            <button class="btn" onclick="refreshCamera()">🔄 Làm mới</button>
-            <a class="btn info" href="http://192.168.1.91/stream" target="_blank">📺 Direct Stream</a>
-            <a class="btn danger" href="http://192.168.1.91/capture" target="_blank">📸 Capture</a>
-            <button class="btn info" onclick="openFullscreen()">🖥️ Toàn màn hình</button>
+            <input type="text" id="ipInput" class="ip-input" placeholder="192.168.1.91" value="192.168.1.91">
+            <button class="btn primary" onclick="testConnection()">🔍 Test Connection</button>
+            <button class="btn" onclick="loadIframe()" id="loadBtn" disabled>📺 Load Camera (HTTP)</button>
+            <button class="btn danger" onclick="openDirect()">🚀 Open Direct</button>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; font-size: 14px; opacity: 0.8;">
+            <p><strong>Note:</strong> This is a demonstration of Mixed Content issues with HTTPS sites and HTTP cameras.</p>
+            <p>For production use, consider implementing HTTPS on ESP32 or using HTTP hosting.</p>
         </div>
     </div>
 
-    <!-- E-Ra Widget Integration -->
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        let eraWidget = null;
-        let currentCameraIP = "192.168.1.91"; // Default IP
-        let startTime = Date.now();
-
-        // Initialize E-Ra Widget
-        function initializeEraWidget() {
+        let currentIP = '192.168.1.91';
+        
+        // Update protocol status
+        document.getElementById('protocol').textContent = location.protocol.toUpperCase() + ' (' + location.hostname + ')';
+        
+        // Update IP display
+        function updateIP() {
+            const ip = document.getElementById('ipInput').value;
+            if (ip && ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+                currentIP = ip;
+                document.getElementById('cameraIP').textContent = ip;
+                document.getElementById('loadBtn').disabled = false;
+                return true;
+            }
+            return false;
+        }
+        
+        // Test connection to camera
+        async function testConnection() {
+            if (!updateIP()) {
+                alert('Please enter a valid IP address (e.g., 192.168.1.91)');
+                return;
+            }
+            
+            document.getElementById('status').textContent = 'Testing connection...';
+            
             try {
-                eraWidget = new EraWidget();
-                
-                eraWidget.init({
-                    onConfiguration: (configuration) => {
-                        console.log('E-Ra Configuration received:', configuration);
-                    },
-
-                    onValues: (values) => {
-                        console.log('E-Ra Values received:', values);
-                        
-                        // Find Virtual Pin values
-                        Object.keys(values).forEach(key => {
-                            const value = values[key].value;
-                            
-                            // Check if this looks like an IP address
-                            if (typeof value === 'string' && value.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-                                updateCameraIP(value);
-                            }
-                            
-                            // Check if this looks like a stream URL
-                            if (typeof value === 'string' && value.includes('http://') && value.includes('/stream')) {
-                                const ip = value.match(/http:\/\/([^\/]+)/)[1];
-                                updateCameraIP(ip);
-                            }
-                        });
-                    }
+                // Try to access camera info endpoint
+                const response = await fetch(`http://${currentIP}/`, {
+                    mode: 'no-cors',
+                    method: 'HEAD'
                 });
                 
-                console.log('E-Ra Widget initialized successfully');
+                // Since we can't read the response in no-cors mode,
+                // we'll assume success if no error is thrown
+                document.getElementById('status').textContent = 'Camera accessible (Mixed content blocked)';
+                document.getElementById('status').style.color = '#ffc107';
+                
             } catch (error) {
-                console.error('Failed to initialize E-Ra Widget:', error);
+                document.getElementById('status').textContent = 'Camera not accessible';
+                document.getElementById('status').style.color = '#ff6b6b';
+                console.log('Connection test error:', error);
             }
         }
-
-        // Update camera IP and reload iframe
-        function updateCameraIP(newIP) {
-            if (newIP && newIP !== currentCameraIP) {
-                console.log('Updating camera IP from', currentCameraIP, 'to', newIP);
-                currentCameraIP = newIP;
-                
-                document.getElementById('cameraIP').textContent = newIP;
-                
-                // Update iframe source to use /iframe endpoint
-                const iframe = document.getElementById('cameraIframe');
-                iframe.src = `http://${newIP}/iframe`;
-                
-                // Show loading
-                document.getElementById('loading').style.display = 'block';
-                
-                // Update control buttons
-                updateControlButtons(newIP);
-            }
-        }
-
-        // Update control button URLs
-        function updateControlButtons(ip) {
-            const streamBtn = document.querySelector('a[href*="/stream"]');
-            const captureBtn = document.querySelector('a[href*="/capture"]');
+        
+        // Load camera in iframe (will likely fail due to mixed content)
+        function loadIframe() {
+            if (!updateIP()) return;
             
-            if (streamBtn) streamBtn.href = `http://${ip}/stream`;
-            if (captureBtn) captureBtn.href = `http://${ip}/capture`;
-        }
-
-        // Refresh camera
-        function refreshCamera() {
             const iframe = document.getElementById('cameraIframe');
-            document.getElementById('loading').style.display = 'block';
-            iframe.src = `http://${currentCameraIP}/iframe?t=` + new Date().getTime();
-        }
-
-        // Open fullscreen
-        function openFullscreen() {
-            window.open(`http://${currentCameraIP}/iframe`, '_blank', 'fullscreen=yes,scrollbars=no,resizable=no');
-        }
-
-        // Update uptime
-        function updateUptime() {
-            const elapsed = Date.now() - startTime;
-            const hours = Math.floor(elapsed / 3600000);
-            const minutes = Math.floor((elapsed % 3600000) / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
+            const container = document.getElementById('iframeContainer');
+            const mainFrame = document.getElementById('mainFrame');
             
-            const uptimeString = 
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
+            iframe.src = `http://${currentIP}/iframe`;
+            container.style.display = 'block';
+            mainFrame.style.display = 'none';
             
-            document.getElementById('uptime').textContent = uptimeString;
-        }
-
-        // Hide loading when iframe loads
-        document.getElementById('cameraIframe').onload = function() {
+            // Set up error handling
+            iframe.onerror = function() {
+                alert('Mixed Content blocked! Please allow insecure content in browser settings.');
+                container.style.display = 'none';
+                mainFrame.style.display = 'flex';
+            };
+            
+            // Timeout fallback
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-            }, 1000);
-        };
-
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing ESP32-CAM Simple iFrame...');
-            
-            // Start uptime counter
-            setInterval(updateUptime, 1000);
-            
-            // Initialize E-Ra Widget
-            initializeEraWidget();
-            
-            // Hide loading after initial load
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
+                if (!iframe.contentDocument && !iframe.contentWindow) {
+                    console.log('iframe likely blocked by Mixed Content Policy');
+                    // Show instructions again
+                }
             }, 3000);
-            
-            console.log('Initialization completed');
-        });
-
-        // Auto-refresh iframe every 5 minutes to prevent timeout
-        setInterval(() => {
-            console.log('Auto-refreshing iframe...');
-            refreshCamera();
-        }, 300000); // 5 minutes
+        }
+        
+        // Open camera directly in new tab
+        function openDirect() {
+            if (!updateIP()) return;
+            window.open(`http://${currentIP}/`, '_blank');
+        }
+        
+        // Initialize
+        document.getElementById('ipInput').addEventListener('input', updateIP);
+        updateIP();
+        
+        // Auto-test connection on load
+        setTimeout(testConnection, 1000);
+        
+        // Detect if page is served over HTTPS
+        if (location.protocol === 'https:') {
+            console.log('HTTPS detected - Mixed Content restrictions apply');
+        } else {
+            document.getElementById('status').textContent = 'HTTP - Should work normally';
+            document.getElementById('status').style.color = '#28a745';
+        }
     </script>
 </body>
 </html>
