@@ -407,7 +407,7 @@
                         if (newIP && newIP !== cameraIP) {
                             cameraIP = newIP;
                             document.getElementById('cameraIP').textContent = cameraIP;
-                            streamUrl = `http://${cameraIP}/stream`;
+                            streamUrl = `http://192.168.1.91/stream`;
                             refreshStream();
                         }
                     }
@@ -445,7 +445,7 @@
             });
 
             // Thiết lập URL stream ban đầu
-            streamUrl = `http://${cameraIP}/stream`;
+            streamUrl = `http://192.168.1.91/stream`;
             document.getElementById('videoStream').src = streamUrl;
             document.getElementById('cameraIP').textContent = cameraIP;
 
@@ -464,7 +464,7 @@
             } else {
                 // Fallback: điều khiển trực tiếp
                 isFlashOn = !isFlashOn;
-                fetch(`http://${cameraIP}/flash`)
+                fetch(`http://192.168.1.91/flash`)
                     .then(response => response.text())
                     .then(data => {
                         console.log('Flash status:', data);
@@ -531,7 +531,7 @@
                 document.getElementById('connectionStatus').textContent = 'Đang khởi động lại...';
             } else {
                 // Fallback: gửi lệnh trực tiếp
-                fetch(`http://${cameraIP}/restart`)
+                fetch(`http://192.168.1.91/restart`)
                     .then(() => {
                         document.getElementById('connectionStatus').textContent = 'Đang khởi động lại...';
                         setTimeout(refreshStream, 3000);
@@ -547,7 +547,7 @@
             document.getElementById('qualityValue').textContent = value;
             
             // Gửi về ESP32-CAM
-            fetch(`http://${cameraIP}/quality?val=${value}`)
+            fetch(`http://192.168.1.91/quality?val=${value}`)
                 .then(response => {
                     console.log('Quality adjusted to:', value);
                 })
@@ -559,7 +559,7 @@
             document.getElementById('brightnessValue').textContent = value;
             
             // Gửi về ESP32-CAM
-            fetch(`http://${cameraIP}/brightness?val=${value}`)
+            fetch(`http://192.168.1.91/brightness?val=${value}`)
                 .then(response => {
                     console.log('Brightness adjusted to:', value);
                 })
@@ -581,7 +581,7 @@
         // Hàm kiểm tra kết nối
         function startConnectionCheck() {
             setInterval(() => {
-                fetch(`http://${cameraIP}/status`)
+                fetch(`http://192.168.1.91/status`)
                     .then(response => {
                         if (response.ok) {
                             document.getElementById('connectionStatus').textContent = 'Đã kết nối';
@@ -625,7 +625,7 @@
                 case 'camera_ip':
                     cameraIP = value;
                     document.getElementById('cameraIP').textContent = cameraIP;
-                    streamUrl = `http://${cameraIP}/stream`;
+                    streamUrl = `http://192.168.1.91/stream`;
                     refreshStream();
                     break;
                 case 'flash_control':
