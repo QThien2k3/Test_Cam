@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -17,21 +17,21 @@
         .container {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            max-width: 1000px;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 100%;
             margin: 0 auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 2.2em;
+            font-size: 1.8em;
             font-weight: 300;
             background: linear-gradient(45deg, #fff, #ffd700);
             -webkit-background-clip: text;
@@ -44,21 +44,21 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
-            padding: 12px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
         .status-indicator {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #ff4757;
             animation: pulse 2s infinite;
-            margin-right: 8px;
+            margin-right: 6px;
         }
 
         .status-indicator.online {
@@ -68,10 +68,10 @@
         .camera-container {
             position: relative;
             background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 20px;
-            min-height: 450px;
+            margin-bottom: 15px;
+            height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -79,9 +79,9 @@
 
         .camera-stream {
             width: 100%;
-            height: 450px;
+            height: 100%;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             background: #000;
             object-fit: contain;
         }
@@ -92,49 +92,49 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 400px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 280px;
         }
 
         .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #fff;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
         .controls {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
         }
 
         .btn:disabled {
@@ -150,30 +150,30 @@
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .info-card {
             background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 4px solid #ffd700;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 3px solid #ffd700;
         }
 
         .info-card h4 {
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             color: #ffd700;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .info-value {
             font-family: 'Courier New', monospace;
             background: rgba(0, 0, 0, 0.3);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
             word-break: break-all;
         }
 
@@ -181,10 +181,10 @@
             background: rgba(255, 193, 7, 0.2);
             border: 1px solid #ffc107;
             color: #fff;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 11px;
         }
 
         .alert.error {
@@ -206,49 +206,25 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                margin: 5px;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .status-bar {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .camera-container {
-                min-height: 300px;
-            }
-            
-            .camera-stream {
-                height: 300px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📹 ESP32-CAM Live Stream</h1>
+            <h1>📹 ESP32-CAM Live</h1>
         </div>
 
         <div id="mixedContentAlert" class="alert error" style="display: none;">
-            <strong>⚠️ Mixed Content Warning:</strong> 
-            Trình duyệt đã chặn HTTP content. Hãy click nút "📱 Mở Camera" để xem stream trong tab mới.
+            <strong>⚠️ Mixed Content:</strong> 
+            Trình duyệt chặn HTTP content. Camera sẽ mở trong tab mới.
         </div>
 
         <div class="status-bar">
             <div style="display: flex; align-items: center;">
                 <div class="status-indicator" id="statusIndicator"></div>
-                <span id="statusText">Đang khởi tạo...</span>
+                <span id="statusText">Khởi tạo...</span>
             </div>
-            <div>📡 IP: <span id="cameraIP">Tự động phát hiện</span></div>
+            <div>📡 <span id="cameraIP">192.168.1.91</span></div>
             <div>⏱️ <span id="uptime">00:00:00</span></div>
         </div>
 
@@ -260,30 +236,30 @@
             
             <div id="streamOverlay" class="stream-overlay">
                 <div class="loading-spinner"></div>
-                <h3>🎥 Đang kết nối camera...</h3>
-                <p id="overlayText">Tự động phát hiện và kết nối ESP32-CAM</p>
+                <h3>🎥 Kết nối camera...</h3>
+                <p id="overlayText">Đang tìm ESP32-CAM...</p>
             </div>
         </div>
 
         <div class="controls">
-            <button class="btn success" onclick="startStream()" id="startBtn">🔄 Kết nối Stream</button>
-            <button class="btn primary" onclick="openCameraPage()" id="openBtn">📱 Mở Camera</button>
+            <button class="btn success" onclick="startStream()" id="startBtn">🔄 Kết nối</button>
+            <button class="btn primary" onclick="openCamera()" id="openBtn">📱 Mở Camera</button>
             <button class="btn danger" onclick="capturePhoto()" id="captureBtn">📸 Chụp ảnh</button>
-            <button class="btn warning" onclick="autoDetectCamera()" id="detectBtn">🔍 Tìm Camera</button>
+            <button class="btn warning" onclick="findCamera()" id="findBtn">🔍 Tìm Camera</button>
         </div>
 
         <div class="info-grid">
             <div class="info-card">
-                <h4>📡 Địa chỉ Camera</h4>
-                <div class="info-value" id="displayIP">Đang tìm kiếm...</div>
+                <h4>📡 Camera IP</h4>
+                <div class="info-value" id="displayIP">192.168.1.91</div>
             </div>
             <div class="info-card">
                 <h4>🔗 Stream URL</h4>
-                <div class="info-value" id="displayURL">Chưa có</div>
+                <div class="info-value" id="displayURL">Chưa kết nối</div>
             </div>
             <div class="info-card">
                 <h4>🌐 Phương thức</h4>
-                <div class="info-value" id="displayMethod">Image Polling</div>
+                <div class="info-value">Image Polling</div>
             </div>
             <div class="info-card">
                 <h4>✅ Trạng thái</h4>
@@ -292,105 +268,65 @@
         </div>
     </div>
 
-    <!-- E-Ra Widget Integration -->
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        // Global variables
-        let eraWidget = null;
-        let currentCameraIP = null;
+        // Global variables - Optimized for E-Ra Widget
+        let currentCameraIP = '192.168.1.91'; // Default IP từ ảnh
         let streamInterval = null;
         let isStreaming = false;
         let startTime = Date.now();
         let retryCount = 0;
         let lastSuccessfulCapture = 0;
-        const maxRetries = 5;
-        const streamFPS = 10; // 10 FPS for smooth streaming
+        const maxRetries = 3; // Reduced for faster fallback
+        const streamFPS = 5; // Lower FPS for E-Ra Widget performance
 
-        // Check if we're in HTTPS context
+        // Check HTTPS context
         const isHTTPS = location.protocol === 'https:';
 
-        // E-Ra Widget initialization
-        function initializeEraWidget() {
-            try {
-                if (typeof EraWidget === 'undefined') {
-                    throw new Error('EraWidget not loaded');
-                }
+        // Initialize immediately when DOM loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 ESP32-CAM E-Ra Widget initializing...');
+            
+            // Update uptime every second
+            setInterval(updateUptime, 1000);
+            
+            // Update UI with default IP
+            updateUI();
+            
+            // Start connection immediately
+            setTimeout(function() {
+                updateStatus('Đang kết nối ESP32-CAM...', false);
+                startStream();
+            }, 500);
+            
+            // Try E-Ra Widget integration after delay
+            setTimeout(initializeEraWidget, 2000);
+        });
 
-                eraWidget = new EraWidget();
-                
-                eraWidget.init({
-                    onConfiguration: (configuration) => {
-                        console.log('✅ E-Ra Configuration:', configuration);
-                        updateStatus('E-Ra kết nối thành công', true);
-                    },
-
-                    onValues: (values) => {
-                        console.log('📊 E-Ra Values:', values);
-                        
-                        // Process E-Ra values to find camera info
-                        Object.keys(values).forEach(key => {
-                            const value = values[key].value;
-                            
-                            // Look for IP address or URL
-                            if (typeof value === 'string') {
-                                // Direct IP address
-                                if (value.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-                                    updateCameraIP(value);
-                                }
-                                // URL with IP
-                                else if (value.includes('http://') && value.includes(':')) {
-                                    const ipMatch = value.match(/http:\/\/([^:\/]+)/);
-                                    if (ipMatch) {
-                                        updateCameraIP(ipMatch[1]);
-                                    }
-                                }
-                                // Stream URL
-                                else if (value.includes('/stream')) {
-                                    const ipMatch = value.match(/http:\/\/([^:\/]+)/);
-                                    if (ipMatch) {
-                                        updateCameraIP(ipMatch[1]);
-                                    }
-                                }
-                            }
-                        });
-                    },
-
-                    onError: (error) => {
-                        console.error('❌ E-Ra Error:', error);
-                        updateStatus('E-Ra lỗi kết nối', false);
-                        setTimeout(fallbackAutoDetect, 2000);
-                    }
-                });
-                
-            } catch (error) {
-                console.error('❌ E-Ra Widget init failed:', error);
-                updateStatus('E-Ra không khả dụng, dùng auto-detect', false);
-                setTimeout(fallbackAutoDetect, 1000);
-            }
-        }
-
-        // Update camera IP
-        function updateCameraIP(ip) {
-            if (ip && ip !== currentCameraIP) {
-                console.log('📡 Camera IP updated:', ip);
-                currentCameraIP = ip;
-                updateUI();
-                
-                // Auto-start stream detection
-                setTimeout(startStream, 1000);
-            }
+        // Update uptime display
+        function updateUptime() {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            const uptimeString = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+            
+            document.getElementById('uptime').textContent = uptimeString;
         }
 
         // Update UI elements
         function updateUI() {
-            document.getElementById('cameraIP').textContent = currentCameraIP || 'Chưa xác định';
-            document.getElementById('displayIP').textContent = currentCameraIP || 'Chưa xác định';
+            document.getElementById('cameraIP').textContent = currentCameraIP;
+            document.getElementById('displayIP').textContent = currentCameraIP;
             
-            const streamURL = currentCameraIP ? `http://${currentCameraIP}/stream` : 'Chưa có';
+            const streamURL = currentCameraIP ? `http://${currentCameraIP}/stream` : 'Chưa kết nối';
             document.getElementById('displayURL').textContent = streamURL;
         }
 
-        // Update status
+        // Update status with visual feedback
         function updateStatus(message, online) {
             document.getElementById('statusText').textContent = message;
             document.getElementById('displayStatus').textContent = message;
@@ -403,47 +339,50 @@
             }
         }
 
-        // Show/hide mixed content alert
+        // Show mixed content alert
         function showMixedContentAlert() {
             if (isHTTPS) {
                 document.getElementById('mixedContentAlert').style.display = 'block';
+                setTimeout(function() {
+                    // Auto-open camera in new tab as fallback
+                    openCamera();
+                    updateStatus('Camera đã mở trong tab mới', true);
+                }, 3000);
             }
         }
 
-        // Start image polling stream (workaround for Mixed Content)
+        // Start image polling stream - OPTIMIZED for E-Ra
         function startStream() {
-            if (!currentCameraIP) {
-                updateStatus('Chưa có địa chỉ camera', false);
-                autoDetectCamera();
-                return;
-            }
-
             if (isStreaming) {
                 stopStream();
                 return;
             }
 
-            updateStatus('Đang kết nối stream...', false);
-            setButtonStates(true);
-
+            updateStatus('Đang kết nối...', false);
+            
             const img = document.getElementById('cameraStream');
             const overlay = document.getElementById('streamOverlay');
             
             // Test connection first
-            testCameraConnection(currentCameraIP, (success) => {
+            testCameraConnection(currentCameraIP, function(success) {
                 if (!success) {
-                    updateStatus('Không thể kết nối camera', false);
-                    setButtonStates(false);
-                    showMixedContentAlert();
+                    updateStatus('Kết nối thất bại', false);
+                    
+                    if (isHTTPS) {
+                        showMixedContentAlert();
+                    } else {
+                        // Try to find camera if not HTTPS
+                        setTimeout(findCamera, 1000);
+                    }
                     return;
                 }
 
-                // Start polling
+                // Start streaming
                 isStreaming = true;
-                document.getElementById('startBtn').textContent = '⏹️ Dừng Stream';
+                document.getElementById('startBtn').textContent = '⏹️ Dừng';
                 document.getElementById('startBtn').className = 'btn danger';
 
-                streamInterval = setInterval(() => {
+                streamInterval = setInterval(function() {
                     if (!isStreaming) return;
 
                     const timestamp = Date.now();
@@ -451,21 +390,21 @@
                     
                 }, 1000 / streamFPS);
 
-                // Handle image load
+                // Handle successful image load
                 img.onload = function() {
                     if (!isStreaming) return;
                     
                     lastSuccessfulCapture = Date.now();
                     
-                    // Show image, hide overlay
+                    // Show stream, hide overlay
                     img.style.display = 'block';
                     overlay.style.display = 'none';
                     
-                    updateStatus('Stream đang hoạt động', true);
+                    updateStatus('Stream hoạt động', true);
                     retryCount = 0;
                 };
 
-                // Handle image error
+                // Handle image load error
                 img.onerror = function() {
                     if (!isStreaming) return;
                     
@@ -474,16 +413,19 @@
                     
                     if (retryCount >= maxRetries) {
                         stopStream();
-                        updateStatus('Stream bị ngắt kết nối', false);
-                        showMixedContentAlert();
+                        updateStatus('Stream ngắt kết nối', false);
+                        
+                        if (isHTTPS) {
+                            showMixedContentAlert();
+                        }
                     }
                 };
 
-                updateStatus('Stream đã khởi động', true);
+                updateStatus('Đang khởi động stream...', true);
             });
         }
 
-        // Stop stream
+        // Stop streaming
         function stopStream() {
             isStreaming = false;
             
@@ -499,27 +441,18 @@
             overlay.style.display = 'flex';
             
             document.getElementById('overlayText').textContent = 'Stream đã dừng';
-            document.getElementById('startBtn').textContent = '🔄 Kết nối Stream';
+            document.getElementById('startBtn').textContent = '🔄 Kết nối';
             document.getElementById('startBtn').className = 'btn success';
             
-            setButtonStates(false);
             updateStatus('Stream đã dừng', false);
         }
 
-        // Set button states
-        function setButtonStates(disabled) {
-            const buttons = ['openBtn', 'captureBtn', 'detectBtn'];
-            buttons.forEach(id => {
-                document.getElementById(id).disabled = disabled;
-            });
-        }
-
-        // Test camera connection
+        // Test camera connection with shorter timeout for E-Ra
         function testCameraConnection(ip, callback) {
             const testImg = new Image();
-            const timeout = setTimeout(() => {
+            const timeout = setTimeout(function() {
                 callback(false);
-            }, 5000);
+            }, 3000); // Shorter timeout for better UX
 
             testImg.onload = function() {
                 clearTimeout(timeout);
@@ -534,135 +467,124 @@
             testImg.src = `http://${ip}/capture?test=${Date.now()}`;
         }
 
-        // Auto-detect camera
-        function autoDetectCamera() {
-            updateStatus('Đang quét mạng...', false);
-            document.getElementById('overlayText').textContent = 'Đang tìm kiếm camera trên mạng...';
+        // Find camera on network - SIMPLIFIED for E-Ra Widget
+        function findCamera() {
+            updateStatus('Đang tìm camera...', false);
+            document.getElementById('overlayText').textContent = 'Quét mạng tìm ESP32-CAM...';
             
             const commonIPs = [
-                '192.168.1.91',   // Current known IP
+                '192.168.1.91',   // IP từ ảnh
                 '192.168.0.91',
                 '192.168.1.100',
                 '192.168.0.100',
-                '192.168.1.177',
-                '192.168.0.177',
                 '192.168.4.1'     // ESP32 AP mode
             ];
 
             let scanned = 0;
             let found = false;
 
-            commonIPs.forEach((ip, index) => {
-                setTimeout(() => {
-                    testCameraConnection(ip, (success) => {
+            commonIPs.forEach(function(ip, index) {
+                setTimeout(function() {
+                    testCameraConnection(ip, function(success) {
                         scanned++;
                         
                         if (success && !found) {
                             found = true;
                             console.log(`✅ Camera found at: ${ip}`);
-                            updateCameraIP(ip);
+                            currentCameraIP = ip;
+                            updateUI();
+                            updateStatus(`Tìm thấy camera: ${ip}`, true);
+                            
+                            // Auto-start stream
+                            setTimeout(startStream, 500);
                         }
                         
                         if (scanned === commonIPs.length && !found) {
                             updateStatus('Không tìm thấy camera', false);
                             document.getElementById('overlayText').textContent = 
-                                'Không tìm thấy camera. Vui lòng kiểm tra kết nối mạng.';
+                                'Kiểm tra ESP32-CAM và mạng WiFi';
                         }
                     });
-                }, index * 800);
+                }, index * 600); // Staggered testing
             });
         }
 
-        // Fallback auto-detect (when E-Ra fails)
-        function fallbackAutoDetect() {
-            console.log('🔄 Starting fallback auto-detection...');
-            autoDetectCamera();
-        }
-
         // Open camera in new tab
-        function openCameraPage() {
-            if (currentCameraIP) {
-                const url = `http://${currentCameraIP}/`;
-                window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-                updateStatus('Camera đã mở trong tab mới', true);
-            } else {
-                alert('⚠️ Chưa xác định được địa chỉ camera\nHãy thử nút "Tìm Camera" trước.');
-            }
+        function openCamera() {
+            const url = `http://${currentCameraIP}/`;
+            window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            updateStatus('Camera mở trong tab mới', true);
         }
 
         // Capture photo
         function capturePhoto() {
-            if (currentCameraIP) {
-                const url = `http://${currentCameraIP}/capture?download=${Date.now()}`;
-                window.open(url, '_blank');
-                updateStatus('Đã chụp ảnh', true);
-            } else {
-                alert('⚠️ Chưa xác định được địa chỉ camera');
+            const url = `http://${currentCameraIP}/capture?download=${Date.now()}`;
+            window.open(url, '_blank');
+            updateStatus('Đã chụp ảnh', true);
+        }
+
+        // E-Ra Widget integration - SIMPLIFIED
+        function initializeEraWidget() {
+            try {
+                if (typeof EraWidget === 'undefined') {
+                    console.log('E-Ra Widget not available');
+                    return;
+                }
+
+                const eraWidget = new EraWidget();
+                
+                eraWidget.init({
+                    onConfiguration: function(configuration) {
+                        console.log('✅ E-Ra connected');
+                        updateStatus('E-Ra kết nối thành công', true);
+                    },
+
+                    onValues: function(values) {
+                        console.log('📊 E-Ra data received');
+                        
+                        // Look for camera IP in E-Ra data
+                        Object.keys(values).forEach(function(key) {
+                            const value = values[key].value;
+                            
+                            if (typeof value === 'string' && value.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+                                if (value !== currentCameraIP) {
+                                    console.log(`📡 IP updated from E-Ra: ${value}`);
+                                    currentCameraIP = value;
+                                    updateUI();
+                                    
+                                    // Restart stream with new IP
+                                    if (isStreaming) {
+                                        stopStream();
+                                        setTimeout(startStream, 1000);
+                                    }
+                                }
+                            }
+                        });
+                    },
+
+                    onError: function(error) {
+                        console.warn('E-Ra error:', error);
+                    }
+                });
+                
+            } catch (error) {
+                console.warn('E-Ra Widget init failed:', error);
             }
         }
 
-        // Update uptime
-        function updateUptime() {
-            const elapsed = Date.now() - startTime;
-            const hours = Math.floor(elapsed / 3600000);
-            const minutes = Math.floor((elapsed % 3600000) / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
-            
-            const uptimeString = 
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
-            
-            document.getElementById('uptime').textContent = uptimeString;
-        }
-
-        // Monitor stream health
-        function monitorStreamHealth() {
+        // Monitor stream health - SIMPLIFIED
+        setInterval(function() {
             if (isStreaming && lastSuccessfulCapture > 0) {
                 const timeSinceLastCapture = Date.now() - lastSuccessfulCapture;
                 
-                // If no successful capture for 10 seconds, show warning
-                if (timeSinceLastCapture > 10000) {
-                    updateStatus('Stream không ổn định', false);
-                }
-                
-                // If no successful capture for 30 seconds, restart
-                if (timeSinceLastCapture > 30000) {
-                    console.log('🔄 Auto-restarting stream due to timeout...');
+                // Auto-restart if no frames for 20 seconds
+                if (timeSinceLastCapture > 20000) {
+                    console.log('🔄 Auto-restarting stream...');
                     stopStream();
                     setTimeout(startStream, 2000);
                 }
             }
-        }
-
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 ESP32-CAM E-Ra Platform initializing...');
-            
-            // Update uptime every second
-            setInterval(updateUptime, 1000);
-            
-            // Monitor stream health every 5 seconds
-            setInterval(monitorStreamHealth, 5000);
-            
-            // Update UI
-            updateUI();
-            
-            // Show Mixed Content warning if on HTTPS
-            if (isHTTPS) {
-                console.log('⚠️ HTTPS context detected - Mixed Content restrictions apply');
-            }
-            
-            // Initialize E-Ra Widget
-            setTimeout(initializeEraWidget, 1000);
-            
-            // Fallback auto-detection if no IP after 5 seconds
-            setTimeout(() => {
-                if (!currentCameraIP) {
-                    fallbackAutoDetect();
-                }
-            }, 5000);
-        });
+        }, 10000); // Check every 10 seconds
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
@@ -670,6 +592,16 @@
                 stopStream();
             }
         });
+
+        // Auto-retry mechanism for E-Ra Widget
+        setTimeout(function() {
+            if (!isStreaming) {
+                console.log('🔄 Auto-retry connection...');
+                startStream();
+            }
+        }, 5000);
+
+        console.log('📹 ESP32-CAM E-Ra Widget loaded successfully!');
     </script>
 </body>
 </html>
