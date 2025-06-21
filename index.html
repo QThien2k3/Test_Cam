@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32-CAM Control Panel</title>
+    <title>ESP32-CAM Hybrid Solution</title>
     <style>
         body {
             margin: 0;
@@ -39,6 +39,46 @@
             background-clip: text;
         }
 
+        .solution-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -69,104 +109,125 @@
             background: #ffa502;
         }
 
-        .main-panel {
+        .method-card {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
-            padding: 30px;
-            text-align: center;
+            padding: 25px;
             margin-bottom: 20px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-left: 4px solid;
         }
 
-        .camera-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            display: block;
+        .method-card.local {
+            border-left-color: #28a745;
         }
 
-        .main-title {
-            font-size: 1.8em;
+        .method-card.remote {
+            border-left-color: #007bff;
+        }
+
+        .method-title {
+            font-size: 1.4em;
             margin-bottom: 15px;
-            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .description {
-            font-size: 1.1em;
-            margin-bottom: 25px;
+        .method-description {
+            margin-bottom: 20px;
+            line-height: 1.5;
             opacity: 0.9;
-            line-height: 1.4;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .pros, .cons {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .pros {
+            border-left: 3px solid #28a745;
+        }
+
+        .cons {
+            border-left: 3px solid #dc3545;
+        }
+
+        .pros h4, .cons h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .pros h4 {
+            color: #2ed573;
+        }
+
+        .cons h4 {
+            color: #ff6b7a;
+        }
+
+        .pros ul, .cons ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 12px;
         }
 
         .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 15px 25px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            min-height: 60px;
+            gap: 8px;
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .btn.primary { 
-            background: linear-gradient(45deg, #007bff, #0056b3);
-            font-size: 18px;
-            min-height: 80px;
-        }
+        .btn.primary { background: linear-gradient(45deg, #007bff, #0056b3); }
         .btn.danger { background: linear-gradient(45deg, #dc3545, #c82333); }
         .btn.warning { background: linear-gradient(45deg, #ffc107, #e0a800); }
-        .btn.success { background: linear-gradient(45deg, #28a745, #20c997); }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .info-card {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
+        .ngrok-setup {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
             border-radius: 12px;
-            border-left: 4px solid #ffd700;
+            margin: 20px 0;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
         }
 
-        .info-card h4 {
-            margin: 0 0 8px 0;
-            color: #ffd700;
-            font-size: 14px;
-        }
-
-        .info-value {
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 8px;
             font-family: 'Courier New', monospace;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 6px 10px;
-            border-radius: 6px;
             font-size: 12px;
-            word-break: break-all;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
         }
 
         .alert {
@@ -189,28 +250,9 @@
             border-color: #17a2b8;
         }
 
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .quick-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .quick-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
+        .alert.success {
+            background: rgba(40, 167, 69, 0.2);
+            border-color: #28a745;
         }
 
         @keyframes pulse {
@@ -224,20 +266,12 @@
                 margin: 5px;
             }
             
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .controls {
+            .pros-cons {
                 grid-template-columns: 1fr;
             }
             
-            .camera-icon {
-                font-size: 3em;
-            }
-            
-            .main-title {
-                font-size: 1.4em;
+            .solution-tabs {
+                flex-direction: column;
             }
         }
     </style>
@@ -245,141 +279,238 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📹 ESP32-CAM Control Panel</h1>
+            <h1>🔧 ESP32-CAM Hybrid Solution</h1>
         </div>
 
         <div class="alert info">
-            <strong>💡 Giải pháp tối ưu:</strong> 
-            Do hạn chế Mixed Content của trình duyệt, camera sẽ mở trong tab/cửa sổ mới để đảm bảo hoạt động ổn định.
+            <strong>💡 Hybrid Approach:</strong> 
+            Kết hợp cả Local Access và Remote HTTPS Proxy để có trải nghiệm tối ưu nhất.
         </div>
 
         <div class="status-bar">
             <div style="display: flex; align-items: center;">
                 <div class="status-indicator" id="statusIndicator"></div>
-                <span id="statusText">Đang kiểm tra kết nối...</span>
+                <span id="statusText">Đang phân tích kết nối...</span>
             </div>
-            <div>📡 IP: <span id="cameraIP">192.168.1.91</span></div>
-            <div>⏱️ <span id="uptime">00:00:00</span></div>
+            <div>📡 Local IP: <span id="localIP">192.168.1.91</span></div>
+            <div>🌐 Remote URL: <span id="remoteURL">Chưa setup</span></div>
         </div>
 
-        <div class="main-panel">
-            <div class="camera-icon">📹</div>
-            <div class="main-title">ESP32-CAM Live Stream</div>
-            <div class="description">
-                Nhấn nút bên dưới để mở camera trong tab mới.<br>
-                Giao diện sẽ tự động phát hiện ESP32-CAM và hiển thị video trực tiếp.
+        <div class="solution-tabs">
+            <button class="tab-btn active" onclick="showTab('local')">🏠 Local Access</button>
+            <button class="tab-btn" onclick="showTab('remote')">🌐 Remote Access</button>
+            <button class="tab-btn" onclick="showTab('setup')">⚙️ Setup Guide</button>
+        </div>
+
+        <!-- Local Access Tab -->
+        <div id="local" class="tab-content active">
+            <div class="method-card local">
+                <div class="method-title">
+                    🏠 Local Network Access
+                </div>
+                <div class="method-description">
+                    Truy cập trực tiếp ESP32-CAM khi ở cùng mạng WiFi. Tốc độ nhanh, độ trễ thấp, chất lượng video cao.
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✅ Ưu điểm</h4>
+                        <ul>
+                            <li>Tốc độ cao, độ trễ thấp</li>
+                            <li>Chất lượng video tối đa</li>
+                            <li>Không giới hạn bandwidth</li>
+                            <li>Hoàn toàn miễn phí</li>
+                            <li>Ổn định 100%</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>❌ Nhược điểm</h4>
+                        <ul>
+                            <li>Chỉ truy cập trong mạng LAN</li>
+                            <li>Mixed Content với E-Ra HTTPS</li>
+                            <li>Không remote access</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn primary" onclick="openLocalCamera()">🎥 Mở Camera Local</button>
+                    <button class="btn" onclick="testLocalConnection()">🔍 Test Kết Nối</button>
+                    <button class="btn warning" onclick="findLocalCamera()">📡 Tìm Camera</button>
+                </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn primary" onclick="openMainCamera()" id="mainBtn">
-                🎥 Mở Camera Live Stream
-            </button>
-            <button class="btn success" onclick="openDashboard()" id="dashboardBtn">
-                🔧 Dashboard & Controls
-            </button>
-            <button class="btn danger" onclick="capturePhoto()" id="captureBtn">
-                📸 Chụp ảnh ngay
-            </button>
-            <button class="btn warning" onclick="checkStatus()" id="statusBtn">
-                🔍 Kiểm tra trạng thái
-            </button>
+        <!-- Remote Access Tab -->
+        <div id="remote" class="tab-content">
+            <div class="method-card remote">
+                <div class="method-title">
+                    🌐 Remote HTTPS Access
+                </div>
+                <div class="method-description">
+                    Sử dụng Ngrok để tạo HTTPS tunnel, cho phép truy cập từ xa và tương thích hoàn toàn với E-Ra Platform.
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✅ Ưu điểm</h4>
+                        <ul>
+                            <li>Truy cập từ bất kỳ đâu</li>
+                            <li>HTTPS - tương thích E-Ra 100%</li>
+                            <li>Built-in authentication</li>
+                            <li>Không cần port forwarding</li>
+                            <li>Easy setup</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>❌ Nhược điểm</h4>
+                        <ul>
+                            <li>Video streaming có thể lag</li>
+                            <li>Bandwidth giới hạn (Free)</li>
+                            <li>Phụ thuộc ngrok infrastructure</li>
+                            <li>Random URL (Free plan)</li>
+                            <li>Latency cao hơn</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert error">
+                    <strong>⚠️ Lưu ý quan trọng:</strong> 
+                    Dựa trên nghiên cứu, Ngrok có thể capture ảnh tĩnh tốt nhưng video streaming thường bị lag hoặc error với ESP32-CAM.
+                </div>
+
+                <div class="controls">
+                    <button class="btn primary" onclick="openRemoteCamera()" id="remoteBtn" disabled>🌐 Mở Camera Remote</button>
+                    <button class="btn warning" onclick="setupNgrok()">⚙️ Setup Ngrok</button>
+                    <button class="btn" onclick="testRemoteConnection()">🔍 Test Remote</button>
+                </div>
+            </div>
         </div>
 
-        <div class="quick-actions">
-            <button class="quick-btn" onclick="pingCamera()">📡 Ping Camera</button>
-            <button class="quick-btn" onclick="findNewIP()">🔍 Tìm IP mới</button>
-            <button class="quick-btn" onclick="testStream()">🎦 Test Stream</button>
-            <button class="quick-btn" onclick="downloadConfig()">⬇️ Tải Config</button>
-        </div>
+        <!-- Setup Guide Tab -->
+        <div id="setup" class="tab-content">
+            <div class="alert success">
+                <strong>🎯 Khuyến nghị:</strong> 
+                Dùng Local Access cho video streaming chất lượng cao, Remote Access cho monitoring và control từ xa.
+            </div>
 
-        <div class="info-grid">
-            <div class="info-card">
-                <h4>📡 Camera Address</h4>
-                <div class="info-value" id="displayIP">192.168.1.91</div>
-            </div>
-            <div class="info-card">
-                <h4>🔗 Main Dashboard</h4>
-                <div class="info-value" id="dashboardURL">http://192.168.1.91/</div>
-            </div>
-            <div class="info-card">
-                <h4>🎥 Stream Endpoint</h4>
-                <div class="info-value" id="streamURL">http://192.168.1.91/stream</div>
-            </div>
-            <div class="info-card">
-                <h4>📸 Capture API</h4>
-                <div class="info-value" id="captureURL">http://192.168.1.91/capture</div>
-            </div>
-            <div class="info-card">
-                <h4>✅ Connection Status</h4>
-                <div class="info-value" id="connectionStatus">Đang kiểm tra...</div>
-            </div>
-            <div class="info-card">
-                <h4>🌐 Platform</h4>
-                <div class="info-value">E-Ra IoT Platform</div>
+            <div class="ngrok-setup">
+                <h3>🔧 Ngrok Setup Guide</h3>
+                
+                <div style="margin: 20px 0;">
+                    <h4>Bước 1: Tải và cài đặt Ngrok</h4>
+                    <div class="code-block">
+# Download ngrok từ https://ngrok.com/download
+# Hoặc dùng chocolatey (Windows):
+choco install ngrok
+
+# Hoặc homebrew (macOS):
+brew install ngrok/ngrok/ngrok</div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4>Bước 2: Đăng ký và lấy auth token</h4>
+                    <div class="code-block">
+# Đăng ký tại https://ngrok.com/
+# Copy auth token từ dashboard
+ngrok config add-authtoken YOUR_AUTH_TOKEN</div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4>Bước 3: Tạo HTTPS tunnel cho ESP32-CAM</h4>
+                    <div class="code-block">
+# Basic tunnel
+ngrok http 192.168.1.91:80
+
+# Với authentication (khuyến nghị)
+ngrok http 192.168.1.91:80 --basic-auth="username:password"
+
+# Với custom subdomain (Pro plan)
+ngrok http 192.168.1.91:80 --subdomain=my-esp32cam</div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4>Bước 4: Lấy HTTPS URL và test</h4>
+                    <div class="code-block">
+# Ngrok sẽ hiển thị URL như:
+# https://abc123.ngrok.io -> http://192.168.1.91:80
+
+# Test bằng browser:
+# https://abc123.ngrok.io/          (dashboard)
+# https://abc123.ngrok.io/capture  (single photo)
+# https://abc123.ngrok.io/stream   (video - có thể lag)</div>
+                </div>
+
+                <div class="alert error">
+                    <strong>🚨 Vấn đề đã biết với Video Streaming:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>MJPEG stream qua ngrok thường bị lag hoặc broken</li>
+                        <li>Chỉ một client có thể stream cùng lúc</li>
+                        <li>Bandwidth free plan bị giới hạn</li>
+                        <li>Latency cao do routing qua ngrok servers</li>
+                    </ul>
+                </div>
+
+                <div class="controls">
+                    <button class="btn primary" onclick="copyNgrokCommand()">📋 Copy Ngrok Command</button>
+                    <button class="btn warning" onclick="openNgrokDashboard()">📊 Mở Ngrok Dashboard</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- E-Ra Widget Integration -->
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
         // Global variables
-        let currentCameraIP = '192.168.1.91';
-        let startTime = Date.now();
-        let connectionStatus = 'unknown';
-        let eraWidget = null;
+        let localIP = '192.168.1.91';
+        let remoteURL = '';
+        let ngrokRunning = false;
 
-        // Initialize on DOM load
+        // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 ESP32-CAM Control Panel initialized');
+            console.log('🚀 ESP32-CAM Hybrid Solution initialized');
+            analyzeConnection();
             
-            // Start uptime counter
-            setInterval(updateUptime, 1000);
-            
-            // Update UI with current IP
-            updateAllURLs();
-            
-            // Check camera status immediately
-            setTimeout(function() {
-                checkCameraStatus();
-            }, 1000);
-            
-            // Initialize E-Ra Widget
-            setTimeout(initializeEraWidget, 2000);
-            
-            // Periodic status check
-            setInterval(checkCameraStatus, 30000); // Every 30 seconds
+            // Check for ngrok URL in localStorage
+            const savedRemoteURL = localStorage.getItem('esp32cam_remote_url');
+            if (savedRemoteURL) {
+                remoteURL = savedRemoteURL;
+                document.getElementById('remoteURL').textContent = remoteURL;
+                document.getElementById('remoteBtn').disabled = false;
+            }
         });
 
-        // Update uptime display
-        function updateUptime() {
-            const elapsed = Date.now() - startTime;
-            const hours = Math.floor(elapsed / 3600000);
-            const minutes = Math.floor((elapsed % 3600000) / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
             
-            const uptimeString = 
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
             
-            document.getElementById('uptime').textContent = uptimeString;
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        // Update all URLs when IP changes
-        function updateAllURLs() {
-            document.getElementById('cameraIP').textContent = currentCameraIP;
-            document.getElementById('displayIP').textContent = currentCameraIP;
-            document.getElementById('dashboardURL').textContent = `http://${currentCameraIP}/`;
-            document.getElementById('streamURL').textContent = `http://${currentCameraIP}/stream`;
-            document.getElementById('captureURL').textContent = `http://${currentCameraIP}/capture`;
+        // Analyze connection
+        function analyzeConnection() {
+            updateStatus('Đang phân tích kết nối...', 'checking');
+            
+            // Test local connection
+            testCameraConnection(localIP, function(result) {
+                if (result.success) {
+                    updateStatus('Local ESP32-CAM online', 'online');
+                } else {
+                    updateStatus('ESP32-CAM offline hoặc IP thay đổi', 'offline');
+                    findLocalCamera();
+                }
+            });
         }
 
-        // Update status display
+        // Update status
         function updateStatus(message, status) {
             document.getElementById('statusText').textContent = message;
-            document.getElementById('connectionStatus').textContent = message;
             
             const indicator = document.getElementById('statusIndicator');
             indicator.classList.remove('online', 'checking');
@@ -389,275 +520,166 @@
             } else if (status === 'checking') {
                 indicator.classList.add('checking');
             }
-            
-            connectionStatus = status;
-        }
-
-        // Check camera status
-        function checkCameraStatus() {
-            updateStatus('Đang kiểm tra kết nối...', 'checking');
-            
-            testCameraConnection(currentCameraIP, function(result) {
-                if (result.success) {
-                    updateStatus('ESP32-CAM online và sẵn sàng', 'online');
-                    console.log('✅ Camera is online');
-                } else {
-                    updateStatus('ESP32-CAM không phản hồi', 'offline');
-                    console.log('❌ Camera is offline');
-                    
-                    // Try to find camera on different IP
-                    setTimeout(findNewIP, 2000);
-                }
-            });
         }
 
         // Test camera connection
         function testCameraConnection(ip, callback) {
             const testImg = new Image();
-            const timeout = setTimeout(function() {
-                callback({ success: false, error: 'timeout' });
-            }, 5000);
+            const timeout = setTimeout(() => callback({ success: false }), 5000);
 
             testImg.onload = function() {
                 clearTimeout(timeout);
-                callback({ success: true, ip: ip });
+                callback({ success: true });
             };
 
             testImg.onerror = function() {
                 clearTimeout(timeout);
-                callback({ success: false, error: 'connection_failed' });
+                callback({ success: false });
             };
 
             testImg.src = `http://${ip}/capture?test=${Date.now()}`;
         }
 
-        // Main camera function - opens full interface
-        function openMainCamera() {
-            const url = `http://${currentCameraIP}/`;
-            
-            // Try to open in new window with specific features
-            const newWindow = window.open(
-                url, 
-                'ESP32CAM_Main', 
-                'width=1200,height=800,scrollbars=yes,resizable=yes,location=yes'
-            );
-            
-            if (newWindow) {
-                updateStatus('Camera đã mở trong cửa sổ mới', 'online');
-                
-                // Focus the new window
-                setTimeout(function() {
-                    newWindow.focus();
-                }, 100);
-            } else {
-                alert('❌ Popup bị chặn!\n\n🔧 Giải pháp:\n1. Cho phép popup cho trang này\n2. Hoặc thử nút "Dashboard & Controls"');
-            }
+        // Local camera functions
+        function openLocalCamera() {
+            const url = `http://${localIP}/`;
+            window.open(url, '_blank', 'width=1200,height=800');
         }
 
-        // Open dashboard/debug interface
-        function openDashboard() {
-            const url = `http://${currentCameraIP}/`;
-            window.open(url, '_blank');
-            updateStatus('Dashboard đã mở trong tab mới', 'online');
-        }
-
-        // Capture photo
-        function capturePhoto() {
-            const url = `http://${currentCameraIP}/capture?download=${Date.now()}`;
-            window.open(url, '_blank');
-            updateStatus('Ảnh đã được chụp và tải xuống', 'online');
-        }
-
-        // Check status (manual)
-        function checkStatus() {
-            checkCameraStatus();
-        }
-
-        // Ping camera
-        function pingCamera() {
-            updateStatus('Đang ping camera...', 'checking');
-            
-            testCameraConnection(currentCameraIP, function(result) {
+        function testLocalConnection() {
+            updateStatus('Testing local connection...', 'checking');
+            testCameraConnection(localIP, function(result) {
                 if (result.success) {
-                    alert(`✅ Ping thành công!\n\n📡 IP: ${currentCameraIP}\n⏱️ Phản hồi: < 5 giây\n🎥 Camera đang hoạt động`);
-                    updateStatus('Ping thành công', 'online');
+                    updateStatus('Local connection OK', 'online');
+                    alert(`✅ Local Test Successful!\n\n📡 IP: ${localIP}\n🎥 Camera online\n📱 Ready for video streaming`);
                 } else {
-                    alert(`❌ Ping thất bại!\n\n📡 IP: ${currentCameraIP}\n⚠️ Camera không phản hồi\n🔧 Kiểm tra kết nối mạng`);
-                    updateStatus('Ping thất bại', 'offline');
+                    updateStatus('Local connection failed', 'offline');
+                    alert(`❌ Local Test Failed!\n\n📡 IP: ${localIP}\n⚠️ Camera offline\n🔧 Try "Tìm Camera"`);
                 }
             });
         }
 
-        // Find new IP
-        function findNewIP() {
-            updateStatus('Đang quét mạng tìm ESP32-CAM...', 'checking');
+        function findLocalCamera() {
+            updateStatus('Scanning network for ESP32-CAM...', 'checking');
             
             const commonIPs = [
-                '192.168.1.91',   // Current
-                '192.168.0.91',   
-                '192.168.1.100',  
-                '192.168.0.100',  
-                '192.168.1.177',  
-                '192.168.0.177',  
-                '192.168.4.1',    // AP mode
-                '192.168.1.101',
-                '192.168.1.102'
+                '192.168.1.91', '192.168.0.91', '192.168.1.100', '192.168.0.100',
+                '192.168.1.177', '192.168.0.177', '192.168.4.1'
             ];
 
-            let scanned = 0;
             let found = false;
+            let scanned = 0;
 
-            commonIPs.forEach(function(ip, index) {
-                setTimeout(function() {
+            commonIPs.forEach((ip, index) => {
+                setTimeout(() => {
                     testCameraConnection(ip, function(result) {
                         scanned++;
-                        
                         if (result.success && !found) {
                             found = true;
-                            console.log(`✅ ESP32-CAM found at: ${ip}`);
-                            
-                            if (ip !== currentCameraIP) {
-                                currentCameraIP = ip;
-                                updateAllURLs();
-                                alert(`🎉 Tìm thấy ESP32-CAM!\n\n📡 IP mới: ${ip}\n✅ Đã cập nhật tự động`);
-                            }
-                            
-                            updateStatus(`Camera tìm thấy tại ${ip}`, 'online');
+                            localIP = ip;
+                            document.getElementById('localIP').textContent = ip;
+                            updateStatus(`Camera found at ${ip}`, 'online');
+                            alert(`🎉 Camera Found!\n\n📡 New IP: ${ip}\n✅ Updated automatically`);
                         }
                         
                         if (scanned === commonIPs.length && !found) {
-                            updateStatus('Không tìm thấy ESP32-CAM trên mạng', 'offline');
-                            alert('❌ Không tìm thấy ESP32-CAM\n\n🔧 Kiểm tra:\n• ESP32-CAM có nguồn?\n• Đã kết nối WiFi?\n• Cùng mạng với máy tính?');
+                            updateStatus('No camera found on network', 'offline');
                         }
                     });
-                }, index * 800);
+                }, index * 600);
             });
         }
 
-        // Test stream
-        function testStream() {
-            updateStatus('Đang test stream...', 'checking');
-            
-            const streamURL = `http://${currentCameraIP}/stream`;
-            const testWindow = window.open(streamURL, 'StreamTest', 'width=800,height=600');
-            
-            if (testWindow) {
-                updateStatus('Stream test đã mở', 'online');
-                setTimeout(function() {
-                    testWindow.focus();
-                }, 100);
+        // Remote camera functions
+        function openRemoteCamera() {
+            if (remoteURL) {
+                window.open(remoteURL, '_blank');
             } else {
-                alert('❌ Không thể mở stream test\nThử cho phép popup hoặc mở manual');
+                alert('⚠️ Remote URL not set up\nPlease setup Ngrok first');
             }
         }
 
-        // Download configuration
-        function downloadConfig() {
-            const config = {
-                esp32_ip: currentCameraIP,
-                dashboard_url: `http://${currentCameraIP}/`,
-                stream_url: `http://${currentCameraIP}/stream`,
-                capture_url: `http://${currentCameraIP}/capture`,
-                api_status: `http://${currentCameraIP}/api/status`,
-                connection_status: connectionStatus,
-                timestamp: new Date().toISOString(),
-                platform: 'E-Ra IoT Platform',
-                notes: 'ESP32-CAM configuration for E-Ra integration'
+        function testRemoteConnection() {
+            if (!remoteURL) {
+                alert('⚠️ No remote URL configured\nSetup Ngrok first');
+                return;
+            }
+            
+            updateStatus('Testing remote connection...', 'checking');
+            
+            // Test by trying to load an image from remote URL
+            const testImg = new Image();
+            const timeout = setTimeout(() => {
+                updateStatus('Remote connection timeout', 'offline');
+                alert('❌ Remote Test Failed!\n\n⚠️ Possible issues:\n• Ngrok not running\n• Wrong URL\n• Network connectivity');
+            }, 10000);
+
+            testImg.onload = function() {
+                clearTimeout(timeout);
+                updateStatus('Remote connection OK', 'online');
+                alert(`✅ Remote Test Successful!\n\n🌐 URL: ${remoteURL}\n📡 Ngrok tunnel active\n🎥 Ready for remote access`);
             };
-            
-            const configJSON = JSON.stringify(config, null, 2);
-            const blob = new Blob([configJSON], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `esp32cam-config-${Date.now()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            updateStatus('Configuration đã tải xuống', 'online');
+
+            testImg.onerror = function() {
+                clearTimeout(timeout);
+                updateStatus('Remote connection failed', 'offline');
+                alert('❌ Remote Test Failed!\n\nCheck:\n• Ngrok is running\n• URL is correct\n• ESP32-CAM is online');
+            };
+
+            testImg.src = `${remoteURL}/capture?test=${Date.now()}`;
         }
 
-        // Initialize E-Ra Widget
-        function initializeEraWidget() {
-            try {
-                if (typeof EraWidget === 'undefined') {
-                    console.log('E-Ra Widget not available');
-                    return;
-                }
-
-                eraWidget = new EraWidget();
+        function setupNgrok() {
+            const ngrokURL = prompt(
+                `🔧 Ngrok Setup\n\n` +
+                `1. Install ngrok: https://ngrok.com/download\n` +
+                `2. Run: ngrok http ${localIP}:80\n` +
+                `3. Copy the HTTPS URL and paste below:\n\n` +
+                `Example: https://abc123.ngrok.io`,
+                'https://'
+            );
+            
+            if (ngrokURL && ngrokURL.startsWith('https://')) {
+                remoteURL = ngrokURL;
+                document.getElementById('remoteURL').textContent = ngrokURL;
+                document.getElementById('remoteBtn').disabled = false;
                 
-                eraWidget.init({
-                    onConfiguration: function(configuration) {
-                        console.log('✅ E-Ra Widget connected');
-                    },
+                // Save to localStorage
+                localStorage.setItem('esp32cam_remote_url', ngrokURL);
+                
+                alert(`✅ Ngrok URL saved!\n\n🌐 URL: ${ngrokURL}\n\n🎯 Now test the connection with "Test Remote" button`);
+                
+                // Auto test
+                setTimeout(testRemoteConnection, 1000);
+            }
+        }
 
-                    onValues: function(values) {
-                        console.log('📊 E-Ra data received');
-                        
-                        // Look for camera IP in E-Ra data
-                        Object.keys(values).forEach(function(key) {
-                            const value = values[key].value;
-                            
-                            if (typeof value === 'string' && value.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-                                if (value !== currentCameraIP) {
-                                    console.log(`📡 IP updated from E-Ra: ${value}`);
-                                    currentCameraIP = value;
-                                    updateAllURLs();
-                                    checkCameraStatus();
-                                }
-                            }
-                        });
-                    },
-
-                    onError: function(error) {
-                        console.warn('E-Ra Widget error:', error);
-                    }
+        // Utility functions
+        function copyNgrokCommand() {
+            const command = `ngrok http ${localIP}:80 --basic-auth="admin:esp32cam"`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(command).then(() => {
+                    alert(`✅ Command copied!\n\n📋 Command:\n${command}\n\n🔧 Run this in your terminal`);
                 });
-                
-            } catch (error) {
-                console.warn('E-Ra Widget initialization failed:', error);
+            } else {
+                prompt('📋 Copy this command:', command);
             }
         }
 
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'o':
-                        e.preventDefault();
-                        openMainCamera();
-                        break;
-                    case 'd':
-                        e.preventDefault();
-                        openDashboard();
-                        break;
-                    case 'c':
-                        e.preventDefault();
-                        capturePhoto();
-                        break;
-                    case 'r':
-                        e.preventDefault();
-                        checkStatus();
-                        break;
-                }
-            }
-        });
+        function openNgrokDashboard() {
+            window.open('http://127.0.0.1:4040', '_blank');
+        }
 
         console.log(`
-🎮 ESP32-CAM Control Panel Ready!
+🔧 ESP32-CAM Hybrid Solution Ready!
 
-⌨️ Keyboard Shortcuts:
-• Ctrl+O: Open Main Camera
-• Ctrl+D: Open Dashboard  
-• Ctrl+C: Capture Photo
-• Ctrl+R: Refresh Status
+🏠 Local Access: Fast, high quality, LAN only
+🌐 Remote Access: Worldwide, HTTPS, may have lag
 
-📡 Current IP: ${currentCameraIP}
-🌐 Platform: E-Ra IoT
+💡 Best Practice:
+- Use Local for video streaming
+- Use Remote for monitoring & control
         `);
     </script>
 </body>
